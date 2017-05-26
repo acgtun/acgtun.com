@@ -1,0 +1,21 @@
+{% extends 'leetcode/base.html' %}
+
+{% block content %}
+    <table align="left" border="1">
+        <tr>
+            <td>Problem</td>
+            <td>C/C++</td>
+            <td>Java</td>
+            <td>Python3</td>
+        </tr>
+
+        {% for problem in problems.keys %}
+            <tr>
+                <td width="50%">{{ problem }}</td>
+                <td width="20%"><a href={% url 'solution' problem=problem lang='cpp' %}>cpp</a></td>
+                <td width="20%"><a href={% url 'solution' problem=problem lang='java' %}>java</a></td>
+                <td width="20%"><a href={% url 'solution' problem=problem lang='python' %}>python</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

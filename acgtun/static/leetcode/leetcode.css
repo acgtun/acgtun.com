@@ -1,0 +1,122 @@
+/*
+Original design: andreas08 (v2.0 - Jul 07, 2008) - A free xhtml/css website template by Andreas Viklund.
+Modified by Yun Huang
+For more information, see http://andreasviklund.com/templates/andreas08/
+*/
+
+/* Body and tag styles */
+
+/* {margin:0; padding:0;}*/
+div, #logosection h1,#logosection h2,#logosection h3,#logosection h4,#navigation ul, #subcontent ul {margin:0; padding:0;}
+body {font:76% Verdana,Tahoma,Arial,sans-serif; line-height:1.4em; text-align:center; color:#303030; background:#e8eaec;}
+a {color:#467aa7; font-weight:bold; text-decoration:none; background-color:inherit;}
+a:hover {color:#2a5a8a; text-decoration:none; background-color:inherit;} /*#2a5a8a dark blue*/
+a img {border:none;}
+td {vertical-align:top;font-size:11px;padding:0px}
+table {border-spacing:0px;}
+/*
+img.left,img.center,img.right {padding:4px; border:1px solid #a0a0a0;}
+img.left {float:left; margin:0 12px 5px 0;}
+img.center {display:block; margin:0 auto 5px auto;}
+img.right {float:right; margin:0 0 5px 12px;}
+*/
+
+/* Header and navigation styles */
+#container {width:760px; margin:20px auto; padding:1px 0; text-align:left; background:#ffffff; color:#303030; border:2px solid #a0a0a0;}/*a0a0a0*/
+#logosection {float:left; height:105px;  width:400px;  }
+#picture {
+	float:right;
+	height:105px;
+	width:300px;
+	margin: 0px;
+	padding: 0px;
+	background-color:#991B1E;
+	border-top-style: none;
+	border-right-style: none;
+	border-bottom-style: none;
+	border-left-style: none;
+}
+
+#header {
+	height:120px;
+	width:758px;
+	background-color:#991B1E;
+	padding:0px;
+	margin-top: 0;
+	margin-right: 1px;
+	margin-bottom: 1px;
+	margin-left: 1px;
+} /* 303030 is black, ffffff is white*/
+#header img {background-color:#991B1E; padding:2px;}
+#header a {padding:1px 6px 0 0px; font-size:1.0em; background-color:inherit;  letter-spacing:0px; font-weight:normal;color:white;} /*color:#FFE100;*/
+
+#header a:hover {color:#F4C500; text-decoration:none;} /*#F4C500  orange*/
+#header h1 {margin:5 5px 0 10px; padding:0px 0px 0px 0px; font-size:2.5em; background-color:inherit;  letter-spacing:-1px; font-weight:normal; color:white;}
+#header h2 {margin:0 0 0 30px; padding:0 0 0 0; font-size:1.4em; background-color:inherit;  letter-spacing:-1px; font-weight:normal;}
+#header h3 {margin:2px 0 0 50px; padding:0 0 0 0;  font-size:1.3em; background-color:inherit;  letter-spacing:normal; font-weight:normal;}
+#header h4 {margin:1px 0 0 70px; padding:0px 0 0px 0;  font-size:1.1em; background-color:inherit;  letter-spacing:-1px; font-weight:normal;}
+#navigation {
+	height:2.2em;
+	line-height:2.2em;
+	width:758px;
+	margin:0 1px;
+	color:#ffffff;
+	font-size:1.1em;
+	background-color: #3366FF;
+} /* font-size:1.4em; change height or line-height can make this line wider*/
+#navigation li {
+	float:left;
+	list-style-type:none;
+	border-right:1px solid #ffffff;
+	white-space:nowrap;
+} 
+#navigation li a {display:block; padding:0 10px; font-size:0.8em; font-weight:normal; text-transform:uppercase; text-decoration:none; background-color:inherit; color: #ffffff;}
+* html #navigation a {width:1%;}
+#navigation .selected,#navigation a:hover {background:#80b0da; color:#ffffff; text-decoration:none;}
+
+/* Sidebar styles */
+#subcontent {float:left; margin:0 0 auto 10px; width:130px; padding:20px 20px 10px 0; line-height:1.4em;}
+#subcontent h2 {display:block; margin:0 0 15px 0; font-size:1.6em; font-weight:normal; text-align:left; letter-spacing:-1px; color:#505050; background-color:inherit;}
+#subcontent p {margin:0 0 16px 0; font-size:0.9em;}
+
+/* Content styles */
+#maincontent {
+	float:center;
+	width:680px;
+	font-size:14px;
+	padding:20px 20px 0 30px;
+}
+#command {
+	font-size:11px;
+}
+
+.content {float:right; margin:5px 15px 0 0; width:530px; font-size:0.9em; padding:20px 20px 0 0px;}
+#maincontent h2, .content h2 {display:block; margin:0 0 16px 0; font-size:1.7em; font-weight:normal; letter-spacing:-1px; color:#003865; background-color:inherit;} /*#505050*/
+.content h2 a {font-weight:normal;}
+.content h3 {margin:5px 0 0px 0; font-size:1.4em; letter-spacing:normal; color:#64614E}
+.content a:hover,#subcontent a:hover {text-decoration:underline;}
+.peoplePic {float:left; margin:5px 0 0 0; padding:7px 0 0 0; height:90px;  width:70px; }
+.peopleDes {float:right; height:95px;  width:450px; padding:10px 0 0 0; }
+
+.peopleNoPic { margin:5px 0 0 0; padding:7px 0 0 0; height:10px;  width:0; }
+.peopleDesNoPic { margin:5px 0 0 0; height:15px;  width:500px; padding:0 0 0 0; }
+
+.eventDate {margin:2px 0 0 0; padding:0 0 0 0;  width:100px; }
+.eventInfor {margin:2px 0 0 0; padding:0 0 0 0; width:420px; }
+
+.content ul, .content ol {margin:0 5px 16px 35px;}
+.content dl {margin:0 5px 10px 25px;}
+.content dt {font-weight:bold; margin-bottom:5px;}
+.content dd {margin:0 0 10px 15px;}
+
+
+
+/* Footer styles */
+#acknowledge {clear:both; width:700px;  margin:0 0px; font-size:0.8em; color:#303030; align:"right" }
+#acknowledge a {clear:both; width:700px; font-size:1.0em; color:#991B1E; align:"right" ; font-weight:normal;}
+#footer {clear:both; width:758px; padding:5px 0; margin:0 1px; font-size:0.9em; color:#f0f0f0; background:#991B1E;}
+#footer p {padding:0; margin:0; text-align:center;}
+#footer a {color:#f0f0f0; background-color:inherit; font-weight:bold;}
+#footer a:hover {color:#ffffff; background-color:inherit; text-decoration: none;}
+
+
