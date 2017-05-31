@@ -18,7 +18,7 @@ from django.contrib import admin
 from . import home, about
 
 urlpatterns = [
-    #url(r'^admin/', admin.site.urls),
+    # url(r'^admin/', admin.site.urls),
     url(r'^$', home.index, name='home'),
     url(r'^about/$', about.index, name='about'),
     url(r'^leetcode/', include('leetcode.urls')),
