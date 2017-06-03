@@ -6,17 +6,29 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.http import HttpResponse
+from django.template.loader import render_to_string
 
-from . import page
 import os
-from os import listdir
-from os import walk
-
-from django.conf import settings
-
+from . import db_table
+from database.database import Database
 
 
 def as_view(request, problem=None, lang='java'):
-
-    return HttpResponse(problem + lang)
-
+    db = Database(os.path.join('/Users/haifeng.chen/gitcode/acgtun.com/acgtun', 'db.sqlite3'))
+    solutions = db.query(
+        'SELECT id,problem,cpptime,cppcode,javatime,javacode,pythontime,pythoncode FROM {}'.format(
+            db_table.leetcode_solution_table))
+    for s in solutions:
+        if problem == s[1]:
+            # print('{}'.format(problem))
+            if lang == 'cpp':
+                code = s[3]
+            elif lang == 'java':
+                code = s[5]
+            elif lang == 'python':
+                code = s[7]
+    # print(code)
+    response = HttpResponse()
+    response.write(render_to_string('leetcode/solution.html', {'problem': problem, 'code': code, 'lang': lang}))
+    response.close()
+    return response

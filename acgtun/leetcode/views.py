@@ -2,41 +2,40 @@
 from __future__ import unicode_literals
 from __future__ import absolute_import
 
+import os
+import sys
+from collections import OrderedDict
+
 from django.template.loader import render_to_string
 from django.http import HttpResponse
-import os
 
-from load_csv_file import load_csv_file
-from django.conf import settings
+from . import db_table
+from database.database import Database
+
+sys.path.append('/Users/haifeng.chen/gitcode/acgtun.com/acgtun/common')
+sys.path.append('/Users/haifeng.chen/gitcode/acgtun.com/acgtun/database')
 
 
-def getSolutions(response):
-    file = 'static/leetcode/leetcode_problems.csv'
-    file = os.path.join(settings.BASE_DIR, file)
-    [fields, solutions] = load_csv_file(file)
+def get_solution(response):
+    db = Database(os.path.join('/Users/haifeng.chen/gitcode/acgtun.com/acgtun', 'db.sqlite3'))
+    solutions = db.query("SELECT id,problem,cpptime,cppcode,javatime,javacode,pythontime,pythoncode FROM {}".format(
+        db_table.leetcode_solution_table))
 
-    # 'problem,C++,C++Link,Java,JavaLink,Python3,Python3Link\n')
-    problemName = 'problem'
-    CLink = 'C++Link'
-    JLink = 'JavaLink'
-    PLink = 'Python3Link'
-
-    problem = {}
+    problems = OrderedDict()
     for r in solutions:
-        pn = r[problemName]
-        #pn = str(pn).replace('-', '')
+        pn = r[1]
         pn = pn.rstrip()
-        if pn not in problem.keys():
-            problem[pn] = {}
-        problem[pn]['cpp'] = r[CLink]
-        problem[pn]['java'] = r[JLink]
-        problem[pn]['python'] = r[PLink]
+        if pn not in problems.keys():
+            problems[pn] = OrderedDict()
+        problems[pn]['cpp'] = r[3]
+        problems[pn]['java'] = r[5]
+        problems[pn]['python'] = r[7]
 
-    return response.write(render_to_string('leetcode/index.html', {'problems': problem}))
+    return response.write(render_to_string('leetcode/index.html', {'problems': problems}))
 
 
 def index(request):
     response = HttpResponse();
-    getSolutions(response)
+    get_solution(response)
     response.close()
     return response
