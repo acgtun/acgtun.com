@@ -4,6 +4,7 @@ import sqlite3 as sql
 class Database:
     def __init__(self, db_path):
         self.db_path = db_path
+        print('db_path = {}'.format(db_path))
         self.connection = sql.connect(db_path)
 
     def execute(self, command, parameters=None):

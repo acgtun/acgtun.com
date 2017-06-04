@@ -15,9 +15,9 @@ from database.database import Database
 sys.path.append('/Users/haifeng.chen/gitcode/acgtun.com/acgtun/common')
 sys.path.append('/Users/haifeng.chen/gitcode/acgtun.com/acgtun/database')
 
-
+db_path = '/home/chenhaifeng88888/apps/django/django_projects/acgtun/database'
 def get_solution(response):
-    db = Database(os.path.join('/Users/haifeng.chen/gitcode/acgtun.com/acgtun', 'db.sqlite3'))
+    db = Database(os.path.join(db_path, 'db.sqlite3'))
     solutions = db.query("SELECT id,problem,cpptime,cppcode,javatime,javacode,pythontime,pythoncode FROM {}".format(
         db_table.leetcode_solution_table))
 

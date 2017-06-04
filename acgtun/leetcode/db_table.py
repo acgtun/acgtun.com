@@ -3,16 +3,18 @@ import sys
 from os import walk
 import hashlib
 
-sys.path.append('/Users/haifeng.chen/gitcode/acgtun.com/acgtun/database')
-from database import *
+sys.path.append('/opt/bitnami/apps/django/django_projects/acgtun/database')
+from database.database import *
 
 leetcode_solution_table = 'leetcode_solutions'
 column_names = ['id', 'problem', 'cpptime', 'cppcode', 'javatime', 'javacode', 'pythontime', 'pythoncode']
 
+db_path = '/opt/bitnami/apps/django/django_projects/acgtun/database'
+
 
 def get_solutions():
     langs = ['cpp', 'java', 'python']
-    path = '/Users/haifeng.chen/gitcode/leetcode/algorithms/'
+    path = '/home/chenhaifeng88888/gitcode/leetcode/algorithms/'
     print('path: {}'.format(path))
     problems = {}
     for lang in langs:
@@ -30,7 +32,7 @@ def get_solutions():
 
 
 def create_leetcode_solution_table():
-    db = Database(os.path.join('/Users/haifeng.chen/gitcode/acgtun.com/acgtun', 'db.sqlite3'))
+    db = Database(os.path.join(db_path, 'db.sqlite3'))
     columns = {}
     columns['id'] = {'type': 'INTEGER', 'suffix': 'PRIMARY KEY'}
     columns['problem'] = {'type': 'TEXT', 'suffix': None}
@@ -66,16 +68,18 @@ def create_leetcode_solution_table():
 
         value = [hash_id, problem, cpp['time'], cpp['code'], java['time'], java['code'], python['time'], python['code']]
         value = tuple(v for v in value)
+        print(value)
         db.execute(sql_insert_row(leetcode_solution_table, column_names), value)
         db.commit()
 
 
 def check_tables():
-    db = Database(os.path.join('/Users/haifeng.chen/gitcode/acgtun.com/acgtun', 'db.sqlite3'))
+    db = Database(os.path.join(db_path, 'db.sqlite3'))
     create_leetcode_solution_table()
     """
     results = db.query("SELECT id,problem,cpptime,cppcode,javatime,javacode,pythontime,pythoncode FROM {}".format(
         leetcode_solution_table))
+    print(results)
     for result in results:
         print(result)
         print('---------------------------')
@@ -83,7 +87,7 @@ def check_tables():
 
 
 def delete_table():
-    db = Database(os.path.join('/Users/haifeng.chen/gitcode/acgtun.com/acgtun', 'db.sqlite3'))
+    db = Database(os.path.join(db_path, 'db.sqlite3'))
     db.execute("DELETE FROM {}".format(leetcode_solution_table))
     db.commit()
 

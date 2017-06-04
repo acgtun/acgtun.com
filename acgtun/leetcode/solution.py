@@ -12,9 +12,11 @@ import os
 from . import db_table
 from database.database import Database
 
+db_path = '/home/chenhaifeng88888/apps/django/django_projects/acgtun/database'
+
 
 def as_view(request, problem=None, lang='java'):
-    db = Database(os.path.join('/Users/haifeng.chen/gitcode/acgtun.com/acgtun', 'db.sqlite3'))
+    db = Database(os.path.join(db_path, 'db.sqlite3'))
     solutions = db.query(
         'SELECT id,problem,cpptime,cppcode,javatime,javacode,pythontime,pythoncode FROM {}'.format(
             db_table.leetcode_solution_table))
