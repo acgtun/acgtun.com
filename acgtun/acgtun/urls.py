@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^$', home.index, name='home'),
     url(r'^about/$', about.index, name='about'),
     url(r'^leetcode/', include('leetcode.urls')),
+    url(r'^blog/', include('blog.urls')),
 ]
