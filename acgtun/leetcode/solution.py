@@ -14,7 +14,6 @@ from database.database import Database
 
 db_path = '/home/chenhaifeng88888/apps/django/django_projects/acgtun/database'
 
-
 def as_view(request, problem=None, lang='java'):
     db = Database(os.path.join(db_path, 'db.sqlite3'))
     solutions = db.query(

@@ -11,7 +11,6 @@ column_names = ['id', 'problem', 'cpptime', 'cppcode', 'javatime', 'javacode', '
 
 db_path = '/opt/bitnami/apps/django/django_projects/acgtun/database'
 
-
 def get_solutions():
     langs = ['cpp', 'java', 'python']
     path = '/home/chenhaifeng88888/gitcode/leetcode/algorithms/'
@@ -69,21 +68,21 @@ def create_leetcode_solution_table():
         value = [hash_id, problem, cpp['time'], cpp['code'], java['time'], java['code'], python['time'], python['code']]
         value = tuple(v for v in value)
         print(value)
-        db.execute(sql_insert_row(leetcode_solution_table, column_names), value)
+	db.execute(sql_insert_row(leetcode_solution_table, column_names), value)
         db.commit()
 
 
 def check_tables():
     db = Database(os.path.join(db_path, 'db.sqlite3'))
     create_leetcode_solution_table()
-    """
+    # """
     results = db.query("SELECT id,problem,cpptime,cppcode,javatime,javacode,pythontime,pythoncode FROM {}".format(
         leetcode_solution_table))
     print(results)
     for result in results:
         print(result)
         print('---------------------------')
-    """
+    #"""
 
 
 def delete_table():
