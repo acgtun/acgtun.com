@@ -1,23 +1,25 @@
 {% extends 'leetcode/base.html' %}
 
+{% block title %} Leetcode Solution List {% title %}
+
 {% block content %}
 
 <table align="center" border="1">
     <tr>
         <td>Problem</td>
-        <td>C/C++</td>
-        <td>Java</td>
-        <td>Python3</td>
+        <td align="center">C/C++</td>
+        <td align="center">Java</td>
+        <td align="center">Python3</td>
     </tr>
 
     {% for problem, codes in problems.items %}
     <tr>
-        <td width="50%">{{ problem }}</td>
+        <td "width="100%">{{ problem }}</td>
         {% for lang, code in codes.items %}
         {% if code != 'null' %}
-        <td width="20%"><a href={% url 'solution' problem=problem lang=lang %}>{{ lang }}</a></td>
+        <td align="center" valign="middle" width="16%"><a href={% url 'solution' problem=problem lang=lang %}>{{ lang }}</a></td>
         {% else %}
-        <td width="20%">{{ lang }}</td>
+        <td align="center" valign="middle" width="16%">{{ lang }}</td>
         {% endif %}
         {% endfor %}
     </tr>
