@@ -16,4 +16,4 @@ sys.path.append('/Users/haifeng.chen/gitcode/acgtun.com/acgtun/database')
 
 
 def index(request):
-    return HttpResponse('no');
+    return HttpResponse('nfsdo');

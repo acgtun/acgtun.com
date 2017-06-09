@@ -13,7 +13,9 @@ import sys
 sys.path.append('/opt/bitnami/apps/django/django_projects/acgtun')
 sys.path.append('/opt/bitnami/apps/django/django_projects/acgtun/common')
 sys.path.append('/opt/bitnami/apps/django/django_projects/acgtun/database')
-sys.path.append('/opt/bitnami/apps/django/django_projects/acgtun/leetcode')
+sys.path.append('/opt/bitnami/apps/django/django_projects/acgtun/words')
+sys.path.append('/opt/bitnami/apps/django/django_projects/acgtun/words')
+
 os.environ.setdefault("PYTHON_EGG_CACHE", "/opt/bitnami/apps/django/django_projects/acgtun/egg_cache")
 
 from django.core.wsgi import get_wsgi_application

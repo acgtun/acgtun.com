@@ -22,11 +22,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'ITISASECURITY_KEY'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['104.196.254.235', 'acgtun.com', 'www.acgtun.com', 'linkhub.cc', 'www.linkhub.cc']
-
-# Application definition
+ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -37,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'acgtun',
     'leetcode',
+    'words',
 ]
 
 MIDDLEWARE = [
