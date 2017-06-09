@@ -82,16 +82,16 @@ if __name__ == '__main__':
             words.append(line)
 
     ret = []
-    for n in range(1, 4):
+    for n in range(1, 6):
         word = []
         res = []
         for i in range(0, n):
             word.append('a')
         dfs(0, n, word, res)
         ret.append(res)
-    #print(ret)
+    # print(ret)
 
-    #print(words)
+    # print(words)
     for r in ret:
         l = len(r[0])
         ###########
@@ -112,9 +112,9 @@ if __name__ == '__main__':
         file.close()
 
         ############
-        file_name = 'sufix_{}.csv'.format(l)
+        file_name = 'suffix_{}.csv'.format(l)
         file = open(file_name, 'w')
-        file.write('prefix,words\n')
+        file.write('suffix,words\n')
         for sub in r:
             ws = generate_ends(sub, words)
             if len(ws) == 0:
@@ -122,14 +122,8 @@ if __name__ == '__main__':
             s = ''
             for w in ws[:-1]:
                 s += w
-                s += "$"
+                s += "&"
             s += ws[-1]
             file.write('{},"{}"\n'.format(sub, s))
             print('{},{}'.format(sub, s))
         file.close()
-
-
-
-
-
-
