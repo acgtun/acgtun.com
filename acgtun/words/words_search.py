@@ -41,25 +41,26 @@ def to_html(starts, ends, word):
     if len(ends) > 0:
         message += '<h2> words end with {}</h2>'.format(word)
         message += '<table width=100%>\n'
-        print('yessss')
-        print(message)
+        #print('yessss')
+        #print(message)
         for i in range(0, len(ends), 4):
-            print('{} {}'.format(i, len(ends))
+            print('{} {}'.format(i, len(ends)))
             message += '<tr>\n'
             link = 'https://www.merriam-webster.com/dictionary/' + ends[i]
             message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i])
-            if i + 1 < len(end):
+            if i + 1 < len(ends):
                 link = 'https://www.merriam-webster.com/dictionary/' + ends[i + 1]
-            message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i + 1])
+            	message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i + 1])
             if i + 2 < len(ends):
                 link = 'https://www.merriam-webster.com/dictionary/' + ends[i + 2]
-            message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i + 2])
-            if i + 3 < len(starts):
+            	message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i + 2])
+            if i + 3 < len(ends):
                 link = 'https://www.merriam-webster.com/dictionary/' + ends[i + 3]
-            message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i + 3])
+            	message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i + 3])
             message += '</tr>\n'
-            message += '</table>\n'
-            print(message)
+	message += '</table>\n'
+	#print('fsdfsdfsdf')
+	#print(message)
     return message
 
 

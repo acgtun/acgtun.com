@@ -1,6 +1,6 @@
 {% extends 'leetcode/base.html' %}
 
-{% block title %} Leetcode Solution List {% title %}
+{% block title %} Leetcode Solution List {% endblock %}
 
 {% block content %}
 
@@ -14,7 +14,7 @@
 
     {% for problem, codes in problems.items %}
     <tr>
-        <td "width="100%">{{ problem }}</td>
+        <td "width="100%"> {{ problem }}</td>
         {% for lang, code in codes.items %}
         {% if code != 'null' %}
         <td align="center" valign="middle" width="16%"><a href={% url 'solution' problem=problem lang=lang %}>{{ lang }}</a></td>
