@@ -5,6 +5,6 @@ from django.conf.urls.static import static
 from . import dictionary
 
 urlpatterns = [
-    url(r'^$', dictionary.index, name='dictionary'),
+    url(r'^', dictionary.search, name='dictionary'),
     url(r'^(?P<word>[^/]+)$', dictionary.as_view, name='word'),
 ]

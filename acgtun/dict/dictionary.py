@@ -5,14 +5,15 @@ from __future__ import absolute_import
 # Create your views here.
 from django.http import HttpResponse
 from django.template.loader import render_to_string
+from django.conf import settings
 
 import os
 import sys
 import string
 import pickle
 
-sys.path.append('/opt/bitnami/apps/django/django_projects/acgtun/common')
-word_directoin = '/opt/bitnami/apps/django/django_projects/acgtun/database/dictionary'
+sys.path.append(os.path.join(settings.BASE_DIR, 'common'))
+word_directoin = os.path.join(settings.DATABASE_DIR, 'dictionary')
 
 
 def to_html(word):
@@ -23,15 +24,15 @@ def to_html(word):
             html += att
             html += '&nbsp;&nbsp;'
         html += attrs[-1]
-	html += '<br>'
+        html += '<br>'
         definitions = w['definition']
         for definition in definitions:
             head = definition['head']
             means = definition['means']
             if head != None:
-		head = str(head)
-		head = head.replace('h6', 'h4')
-		html += str(head)
+                head = str(head)
+                head = head.replace('h6', 'h4')
+                html += str(head)
             html += '<ol>'
             for mean in means:
                 html += '<li>'
@@ -49,18 +50,23 @@ def to_html(word):
 
 
 def search(request):
+    print('fklsdjflks')
     word = request.GET.get('word')
     return as_view(request, word)
 
 
 def index(request):
-	response = HttpResponse()
-        response.write(render_to_string('dict/index.html'))
-	response.close()
-	return response
+    response = HttpResponse()
+    response.write(render_to_string('dict/index.html'))
+    response.close()
+    return response
+
 
 def as_view(request, word=None):
-    #print('word={}'.format(word))
+    if(word == None):
+        return index(request)
+
+    print('word={}'.format(word))
     if len(word) == 0:
         response = HttpResponse()
         response.write(render_to_string('dict/word.html',
@@ -78,21 +84,21 @@ def as_view(request, word=None):
         file = os.path.join(word_directoin, '{}'.format(word[0]), '{}.dict'.format(word))
     else:
         file = os.path.join(word_directoin, 'other', '{}.dict'.format(word))
-    
-    #print(file) 
+
+    # print(file)
     if not os.path.exists(file):
         new_word = word[0]
-	new_word = str(new_word)
-	new_word = new_word.upper()
-	new_word = new_word + word[1:]
-	word = new_word
-   	#print(word)
-	if word[0] in string.ascii_uppercase:
-        	file = os.path.join(word_directoin, '{}'.format(word[0]), '{}.dict'.format(word))
-    	else:
-        	file = os.path.join(word_directoin, 'other', '{}.dict'.format(word)) 
-   
-    #prin(file)
+        new_word = str(new_word)
+        new_word = new_word.upper()
+        new_word = new_word + word[1:]
+        word = new_word
+        # print(word)
+        if word[0] in string.ascii_uppercase:
+            file = os.path.join(word_directoin, '{}'.format(word[0]), '{}.dict'.format(word))
+        else:
+            file = os.path.join(word_directoin, 'other', '{}.dict'.format(word))
+
+            # prin(file)
     if os.path.exists(file):
         word_content = pickle.load(open(file, "rb"))
         valid = True
