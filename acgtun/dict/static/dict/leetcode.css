@@ -342,6 +342,8 @@ img.right {float:right; margin:0 0 5px 12px;}
     color: #991B1E;
     align: "right";
     font-weight: normal;
+    position: fixed;
+    bottom: 0;
 }
 
 #footer {
@@ -352,6 +354,8 @@ img.right {float:right; margin:0 0 5px 12px;}
     font-size: 0.9em;
     color: #f0f0f0;
     background: #991B1E;
+    position: fixed;
+    bottom: 0;
 }
 
 #footer p {
