@@ -7,11 +7,12 @@ from django.shortcuts import render
 # Create your views here.
 from django.http import HttpResponse
 from django.template.loader import render_to_string
+from django.conf import settings
 
 import os
 import sys
 
-sys.path.append('/opt/bitnami/apps/django/django_projects/acgtun/common')
+sys.path.append(os.path.join(settings.BASE_DIR, 'common'))
 from load_csv_file import load_csv_file
 
 
@@ -36,13 +37,11 @@ def to_html(starts, ends, word):
                 message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, starts[i + 3])
             message += '</tr>\n'
         message += '</table>\n'
-    # print(message)
+
     message += '<br><hr>'
     if len(ends) > 0:
         message += '<h2> words end with {}</h2>'.format(word)
         message += '<table width=100%>\n'
-        #print('yessss')
-        #print(message)
         for i in range(0, len(ends), 4):
             print('{} {}'.format(i, len(ends)))
             message += '<tr>\n'
@@ -50,17 +49,15 @@ def to_html(starts, ends, word):
             message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i])
             if i + 1 < len(ends):
                 link = 'https://www.merriam-webster.com/dictionary/' + ends[i + 1]
-            	message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i + 1])
+                message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i + 1])
             if i + 2 < len(ends):
                 link = 'https://www.merriam-webster.com/dictionary/' + ends[i + 2]
-            	message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i + 2])
+                message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i + 2])
             if i + 3 < len(ends):
                 link = 'https://www.merriam-webster.com/dictionary/' + ends[i + 3]
-            	message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i + 3])
+                message += '<td width="25%"><a href="{}">{}</a></td>\n'.format(link, ends[i + 3])
             message += '</tr>\n'
-	message += '</table>\n'
-	#print('fsdfsdfsdf')
-	#print(message)
+        message += '</table>\n'
     return message
 
 
@@ -90,7 +87,7 @@ def as_view(request, word=None):
     #############################
     starts = ''
     ends = ''
-    prefix_file = '/home/chenhaifeng88888/apps/django/django_projects/acgtun/database/words/prefix_{}.csv'.format(l)
+    prefix_file = os.path.join(settings.BASE_DIR, 'database/words/prefix_{}.csv'.format(l))
     if os.path.exists(prefix_file):
         [field, prefix] = load_csv_file(prefix_file)
 
@@ -103,7 +100,7 @@ def as_view(request, word=None):
         print('starts')
         print(starts)
 
-    suffix_file = '/home/chenhaifeng88888/apps/django/django_projects/acgtun/database/words/suffix_{}.csv'.format(l)
+    suffix_file = os.path.join(settings.BASE_DIR, 'database/words/suffix_{}.csv'.format(l))
     print(suffix_file)
     if os.path.exists(suffix_file):
         [field, suffix] = load_csv_file(suffix_file)
