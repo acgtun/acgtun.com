@@ -19,12 +19,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ITISASECURITY_KEY'
+SECRET_KEY = 'IT IS A SECURITY KEY'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [u'localhost', '104.196.254.235', 'acgtun.com', 'www.acgtun.com', 'linkhub.cc', 'www.linkhub.cc']
+
+# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -36,6 +38,7 @@ INSTALLED_APPS = [
     'acgtun',
     'leetcode',
     'words',
+    'dict',
 ]
 
 MIDDLEWARE = [
@@ -117,8 +120,6 @@ STATIC_URL = '/static/'
 ###
 # default static files settings for PythonAnywhere.
 # see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
-
-
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'

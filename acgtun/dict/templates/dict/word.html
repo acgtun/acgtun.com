@@ -1,0 +1,12 @@
+{% extends 'dict/base.html' %}
+
+{% block title %} {{ word }} {% endblock %}
+
+{% block content %}
+<h1>{{ word}}</h1>
+{% if valid == False %}
+<h3><font color="color:#FF0000">Error</font>: {{ message }}</h3>
+{% else %}
+{% autoescape off %}{{ message }}{% endautoescape %}
+{% endif %}
+{% endblock %}

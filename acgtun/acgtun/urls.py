@@ -23,4 +23,5 @@ urlpatterns = [
     url(r'^about/$', about.index, name='about'),
     url(r'^leetcode/', include('leetcode.urls')),
     url(r'^words/', include('words.urls')),
+    url(r'^dict/', include('dict.urls')),
 ]

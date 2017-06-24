@@ -20,7 +20,7 @@ def as_view(request, problem=None, lang='java'):
         'SELECT id,problem,cpptime,cppcode,javatime,javacode,pythontime,pythoncode FROM {}'.format(
             db_table.leetcode_solution_table))
     for s in solutions:
-        if problem == s[1]:
+	if problem == s[1]:
             # print('{}'.format(problem))
             if lang == 'cpp':
                 code = s[3]
@@ -28,7 +28,6 @@ def as_view(request, problem=None, lang='java'):
                 code = s[5]
             elif lang == 'python':
                 code = s[7]
-    # print(code)
     response = HttpResponse()
     response.write(render_to_string('leetcode/solution.html', {'problem': problem, 'code': code, 'lang': lang}))
     response.close()

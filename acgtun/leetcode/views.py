@@ -30,7 +30,9 @@ def get_solution(response):
         problems[pn]['cpp'] = r[3]
         problems[pn]['java'] = r[5]
         problems[pn]['python'] = r[7]
-
+	  
+    problems = OrderedDict(sorted(problems.items(), key=lambda t: t[0])) 
+    # print(problems)
     return response.write(render_to_string('leetcode/index.html', {'problems': problems}))
 
 

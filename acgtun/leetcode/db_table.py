@@ -6,6 +6,9 @@ import hashlib
 sys.path.append('/opt/bitnami/apps/django/django_projects/acgtun/database')
 from database.database import *
 
+reload(sys)
+sys.setdefaultencoding('utf8')
+
 leetcode_solution_table = 'leetcode_solutions'
 column_names = ['id', 'problem', 'cpptime', 'cppcode', 'javatime', 'javacode', 'pythontime', 'pythoncode']
 
