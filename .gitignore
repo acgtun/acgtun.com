@@ -1,0 +1,13 @@
+*.pyc
+.DS_Store
+__pycache__
+*.idea
+database
+static
+acgtun/acgtun/settings.py
+acgtun/words/static/words/WS1.png
+acgtun/words/static/words/valid_wordlist.txt
+acgtun/words/static/words/wordlist
+acgtun/words/sufix_1.csv
+acgtun/words/sufix_2.csv
+acgtun/words/sufix_3.csv

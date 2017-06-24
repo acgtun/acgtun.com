@@ -11,8 +11,9 @@ from django.template.loader import render_to_string
 import os
 from . import db_table
 from database.database import Database
+from django.conf import settings
 
-db_path = '/home/chenhaifeng88888/apps/django/django_projects/acgtun/database'
+db_path = os.path.join(settings.BASE_DIR, 'database')
 
 def as_view(request, problem=None, lang='java'):
     db = Database(os.path.join(db_path, 'db.sqlite3'))
