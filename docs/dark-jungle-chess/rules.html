@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<!--
+  暗棋斗兽棋 · Dark Jungle Chess 玩法说明。IDLE_DRAW_LIMIT 与动物名必须和 index.html 一致，tests/game.test.js 会校验。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xfHk7pSbikbTKi3ZC24wzsbbljgzHN5VMQDBDasctXM='; style-src 'sha256-CSRB1OXQt15FoyOlpAnzbJOoeTGcFCiR5FvzYG80DyI='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>玩法说明 · 暗棋斗兽棋</title>
+<meta name="description" content="暗棋斗兽棋 · Dark Jungle Chess 玩法说明：棋子等级、吃子规则、定色、对战与胜负。How to play Dark Jungle Chess.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+<style>
+:root {
+  --bg: #191b21;
+  --panel: #23262f;
+  --line: #3a3f4e;
+  --ivory: #f6f0de;
+  --red: #c0392b;
+  --black: #22303f;
+  --accent: #e8b64c;
+  --text: #e8e6e0;
+  --muted: #9aa0ad;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  background: radial-gradient(1100px 700px at 50% -10%, #2b2f3c, var(--bg));
+  color: var(--text);
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 12px 32px;
+}
+.topbar {
+  width: min(92vw, 640px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.back-link {
+  padding: 5px 14px;
+  font-size: 12px;
+  color: #1b1405;
+  background: var(--accent);
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+}
+#lang-toggle {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+#lang-toggle button {
+  padding: 5px 14px;
+  font-size: 12px;
+  background: var(--panel);
+  color: var(--muted);
+  border: none;
+  cursor: pointer;
+}
+#lang-toggle button.active { background: var(--accent); color: #1b1405; font-weight: 700; }
+main {
+  width: min(92vw, 640px);
+  padding: 20px 22px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 15px;
+  line-height: 1.75;
+}
+h1 {
+  color: var(--accent);
+  font-size: 24px;
+  letter-spacing: 4px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+body.lang-en h1 { letter-spacing: 1px; }
+h2 { color: var(--accent); font-size: 15px; margin: 18px 0 6px; }
+ul { padding-left: 20px; }
+li { margin: 3px 0; }
+li b { color: var(--accent); }
+.rank-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.rank-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: 6px;
+  background: linear-gradient(160deg, var(--ivory), #eadfbe);
+  color: var(--black);
+  font-size: 14px;
+  font-weight: 600;
+}
+.rank-chip .r { color: var(--red); font-weight: 700; }
+.play-btn {
+  display: block;
+  width: fit-content;
+  margin: 22px auto 0;
+  padding: 10px 32px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1b1405;
+  background: var(--accent);
+  border-radius: 8px;
+  text-decoration: none;
+}
+</style>
+</head>
+<body>
+<nav class="topbar">
+  <a class="back-link" id="back-link" href="./"></a>
+  <div id="lang-toggle">
+    <button id="lang-zh">中文</button>
+    <button id="lang-en">EN</button>
+  </div>
+</nav>
+<main id="rules"></main>
+<script>
+'use strict';
+
+const IDLE_DRAW_LIMIT = 40;
+const EMOJI = { 1: '🕸️', 2: '🐘', 3: '🦁', 4: '🐯', 5: '🐺', 6: '🐑', 7: '🐱', 8: '🐭' };
+const LANG_KEY = 'dark-jungle-chess-lang';
+const RULES_SEEN_KEY = 'dark-jungle-chess-rules-seen';
+
+const RULES = {
+  zh: {
+    htmlLang: 'zh-CN',
+    docTitle: '玩法说明 · 暗棋斗兽棋',
+    back: '← 返回游戏',
+    play: '开始游戏',
+    title: '玩法说明',
+    animal: { 1: '网', 2: '象', 3: '狮', 4: '虎', 5: '狼', 6: '羊', 7: '猫', 8: '鼠' },
+    ranks: '棋子等级（数字越小越强，但鼠克网）',
+    sections: [
+      { h: '开局', items: [
+        '4×4 棋盘摆满 16 个棋子，红黑各 8 个，全部背面朝上、随机打乱。',
+        '两位玩家在同一台设备上轮流操作。',
+      ] },
+      { h: '吃子规则', items: [
+        '网（1）可以吃 2–7，但吃不了鼠（8）。',
+        '2–7 可以吃数字比自己大的棋子，例如狮（3）能吃虎、狼、羊、猫、鼠。',
+        '鼠（8）只能吃网（1）。',
+        '同级相撞**同归于尽**：两个棋子都阵亡，格子变空。',
+      ] },
+      { h: '第一步 · 定色', items: [
+        '每一轮由玩家 1、玩家 2 依次各翻开一个暗子。',
+        '两人翻出的颜色不同时，各自执自己翻出的颜色；颜色相同则继续下一轮。',
+        '定色后由玩家 1 先走，已翻开的棋子留在棋盘上正常参战。',
+      ] },
+      { h: '第二步 · 对战（每回合二选一）', items: [
+        '**翻子**：翻开任意一个暗子（翻出来的可能是对方的棋子）。',
+        '**移动/吃子**：先点己方明子，再点高亮格子——绿点是移动到空格，红框是吃掉对方棋子。每次只能上下左右走一格，只能吃已翻开的棋子。',
+        '选中棋子后点其他格子只会取消选中，不会翻子。',
+        '也可以用键盘：方向键移动光标，回车或空格键代替点击。',
+      ] },
+      { h: '胜负', items: [
+        '吃光对方所有棋子获胜。',
+        '轮到你时既没有暗子可翻、也没有棋子能动，判负。',
+        `双方合计连续 ${IDLE_DRAW_LIMIT} 步没有翻子也没有吃子，判和。`,
+        '双方最后的棋子同归于尽，判和。',
+      ] },
+    ],
+  },
+  en: {
+    htmlLang: 'en',
+    docTitle: 'How to Play · Dark Jungle Chess',
+    back: '← Back to game',
+    play: 'Start playing',
+    title: 'How to Play',
+    animal: { 1: 'Net', 2: 'Elephant', 3: 'Lion', 4: 'Tiger', 5: 'Wolf', 6: 'Sheep', 7: 'Cat', 8: 'Mouse' },
+    ranks: 'Piece ranks (lower number is stronger, but Mouse beats Net)',
+    sections: [
+      { h: 'Setup', items: [
+        'The 4×4 board starts full: 16 pieces, 8 Red and 8 Black, all face-down and shuffled.',
+        'Two players take turns on the same device.',
+      ] },
+      { h: 'Capturing', items: [
+        'Net (1) captures 2–7, but not Mouse (8).',
+        '2–7 capture any piece with a bigger number. For example, Lion (3) captures Tiger, Wolf, Sheep, Cat and Mouse.',
+        'Mouse (8) captures only Net (1).',
+        'Same rank means **mutual destruction**: both pieces are removed and the square becomes empty.',
+      ] },
+      { h: 'Step 1 · Pick colors', items: [
+        'Each round, Player 1 and then Player 2 each flip one hidden piece.',
+        'If the two flips are different colors, each player takes the color they flipped. If they match, play another round.',
+        'Player 1 moves first. Pieces flipped here stay on the board and play normally.',
+      ] },
+      { h: 'Step 2 · Battle (each turn, do one)', items: [
+        `**Flip** any hidden piece. It may turn out to be your opponent's.`,
+        '**Move or capture**: tap one of your face-up pieces, then a highlighted square. A green dot moves to an empty square; a red border captures. Pieces move one square up, down, left or right, and can only capture face-up pieces.',
+        'While a piece is selected, tapping any other square only deselects it. It never flips a piece.',
+        'Keyboard works too: arrow keys move the cursor, and Enter or Space acts as a tap.',
+      ] },
+      { h: 'Winning', items: [
+        `Capture all of your opponent's pieces.`,
+        `If it's your turn and you have nothing to flip and no piece can move, you lose.`,
+        `${IDLE_DRAW_LIMIT} moves in a row by both players combined, with no flip and no capture, is a draw.`,
+        'If both sides lose their last pieces to the same mutual destruction, it is a draw.',
+      ] },
+    ],
+  },
+};
+
+function storageGet(key) { try { return window.localStorage.getItem(key); } catch (e) { return null; } }
+function storageSet(key, value) { try { window.localStorage.setItem(key, value); } catch (e) { /* 忽略 */ } }
+
+let lang = RULES[storageGet(LANG_KEY)] ? storageGet(LANG_KEY) : 'zh';
+
+function render() {
+  const R = RULES[lang];
+  document.documentElement.lang = R.htmlLang;
+  document.title = R.docTitle;
+  document.body.classList.toggle('lang-en', lang === 'en');
+  document.getElementById('back-link').textContent = R.back;
+  for (const l of ['zh', 'en']) {
+    const btn = document.getElementById(`lang-${l}`);
+    btn.classList.toggle('active', lang === l);
+    btn.setAttribute('aria-pressed', String(lang === l));
+  }
+  const rankRow = el('div', 'rank-row');
+  for (let r = 1; r <= 8; r++) rankRow.append(el('span', 'rank-chip', el('span', 'r', r), `${EMOJI[r]} ${R.animal[r]}`));
+  const parts = [el('h1', '', R.title), el('h2', '', R.ranks), rankRow];
+  for (const s of R.sections) parts.push(el('h2', '', s.h), el('ul', '', ...s.items.map(x => el('li', '', ...withBold(x)))));
+  const play = el('a', 'play-btn', R.play);
+  play.href = './';
+  parts.push(play);
+  document.getElementById('rules').replaceChildren(...parts);
+}
+
+// 只用 createElement / 文本节点，不拼 HTML（CSP 开启了 Trusted Types）
+function el(tag, className, ...children) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  node.append(...children.map(c => (typeof c === 'object' ? c : String(c))));
+  return node;
+}
+
+// '**粗体**' 标记转成 <b>，其余保持纯文本
+function withBold(text) {
+  return text.split(/\*\*(.+?)\*\*/).map((seg, i) => (i % 2 ? el('b', '', seg) : seg)).filter(seg => seg !== '');
+}
+
+if (typeof document !== 'undefined') {
+  storageSet(RULES_SEEN_KEY, '1');
+  for (const l of ['zh', 'en'])
+    document.getElementById(`lang-${l}`).addEventListener('click', () => {
+      lang = l;
+      storageSet(LANG_KEY, l);
+      render();
+    });
+  render();
+}
+</script>
+</body>
+</html>

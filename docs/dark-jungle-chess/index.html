@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<!--
+  暗棋斗兽棋 · Dark Jungle Chess — 单文件网页游戏，双人同屏，中/英界面。无依赖，浏览器直接打开即可。
+  规则见 rules.html（改规则时两边一起改，测试会校验）与 design/dark-jungle-chess.md；测试：node tests/game.test.js
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Wtxjjh+T7PRy8Pvw3Qk/Zq/z3z4KS4WYUIS/t2vTpl4='; style-src 'sha256-CcClzuI23Iux3rWIo6Piv3a3SEutmEGbWmlbiNcOiZw='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>暗棋斗兽棋</title>
+<meta name="description" content="暗棋斗兽棋 · Dark Jungle Chess：4×4 翻棋版斗兽棋，双人同屏对战，中英双语。A 4×4 hidden-piece Jungle chess for two players on one screen.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="暗棋斗兽棋 · Dark Jungle Chess">
+<meta property="og:description" content="4×4 翻棋版斗兽棋，双人同屏对战。A 4×4 hidden-piece Jungle chess for two players on one screen.">
+<meta property="og:url" content="https://acgtun.com/dark-jungle-chess/">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+<style>
+:root {
+  --bg: #191b21;
+  --panel: #23262f;
+  --line: #3a3f4e;
+  --ivory: #f6f0de;
+  --ivory-edge: #d8cfae;
+  --red: #c0392b;
+  --black: #22303f;
+  --accent: #e8b64c;
+  --text: #e8e6e0;
+  --muted: #9aa0ad;
+  --cell: min(21vw, 108px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  background: radial-gradient(1100px 700px at 50% -10%, #2b2f3c, var(--bg));
+  color: var(--text);
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 12px 32px;
+}
+.topbar {
+  width: min(92vw, 640px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.rules-link {
+  padding: 5px 14px;
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: all .2s;
+}
+.rules-link:hover { color: var(--accent); border-color: var(--accent); }
+.rules-link.new { background: var(--accent); border-color: var(--accent); color: #1b1405; font-weight: 700; }
+#lang-toggle {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+#lang-toggle button {
+  padding: 5px 14px;
+  font-size: 12px;
+  background: var(--panel);
+  color: var(--muted);
+  border: none;
+  cursor: pointer;
+  transition: all .2s;
+}
+#lang-toggle button.active {
+  background: var(--accent);
+  color: #1b1405;
+  font-weight: 700;
+}
+header { text-align: center; margin-bottom: 14px; }
+h1 {
+  font-size: 26px;
+  letter-spacing: 6px;
+  color: var(--accent);
+  text-shadow: 0 2px 8px rgba(0,0,0,.5);
+  margin-bottom: 10px;
+}
+body.lang-en h1 { letter-spacing: 2px; }
+#players {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 2px solid var(--line);
+  font-size: 14px;
+  color: var(--muted);
+  transition: all .25s;
+}
+.badge.active {
+  border-color: var(--accent);
+  color: var(--text);
+  box-shadow: 0 0 12px rgba(232,182,76,.35);
+}
+.chip {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #555;
+  border: 1px solid rgba(255,255,255,.25);
+}
+.chip.red { background: var(--red); }
+.chip.black { background: var(--black); }
+#status {
+  min-height: 24px;
+  font-size: 15px;
+  color: var(--text);
+  max-width: 640px;
+  margin: 0 auto;
+}
+main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+#board {
+  display: grid;
+  grid-template-columns: repeat(4, var(--cell));
+  grid-template-rows: repeat(4, var(--cell));
+  gap: 8px;
+  padding: 12px;
+  background: linear-gradient(160deg, #2c303c, #21242d);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.45);
+  touch-action: manipulation;
+}
+.cell {
+  position: relative;
+  border-radius: 10px;
+  background: rgba(255,255,255,.035);
+  border: 1px dashed rgba(255,255,255,.08);
+}
+.cell:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.cell.target-move { border: 2px solid rgba(120,200,130,.7); }
+.cell.target-move::after {
+  content: "";
+  position: absolute; inset: 0; margin: auto;
+  width: 22%; height: 22%;
+  border-radius: 50%;
+  background: rgba(120,200,130,.65);
+}
+.cell.target-capture { border: 2px solid rgba(235,100,90,.9); box-shadow: 0 0 14px rgba(235,100,90,.45); }
+.card {
+  position: absolute; inset: 0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: transform .12s;
+}
+@media (hover: hover) { .card:hover { transform: translateY(-2px); } }
+.card.flip-in { animation: flipIn .45s ease-out; }
+@keyframes flipIn {
+  0%   { transform: rotateY(90deg) scale(.85); }
+  100% { transform: rotateY(0deg) scale(1); }
+}
+.card.hidden-piece {
+  background: linear-gradient(150deg, #3b4b6b, #26314a);
+  border: 2px solid #526390;
+  box-shadow: inset 0 0 18px rgba(0,0,0,.4), 0 3px 8px rgba(0,0,0,.4);
+  font-size: calc(var(--cell) * .34);
+}
+.card.revealed {
+  background: linear-gradient(160deg, var(--ivory), #eadfbe);
+  border: 2px solid var(--ivory-edge);
+  box-shadow: 0 3px 8px rgba(0,0,0,.45);
+  flex-direction: column;
+  gap: 2px;
+}
+.card.revealed.red  { color: var(--red); }
+.card.revealed.black { color: var(--black); }
+.card.selected {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 18px rgba(232,182,76,.55);
+}
+.card .rank {
+  position: absolute;
+  top: 4px; left: 8px;
+  font-size: calc(var(--cell) * .17);
+  font-weight: 700;
+}
+.card .emoji { font-size: calc(var(--cell) * .40); line-height: 1; }
+.card .name  { font-size: calc(var(--cell) * .19); font-weight: 700; letter-spacing: 2px; }
+body.lang-en .card .name { font-size: calc(var(--cell) * .125); letter-spacing: .3px; }
+.tray {
+  width: 128px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+}
+.tray h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+body.lang-en .tray h3 { letter-spacing: .5px; }
+.tray-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  min-height: 34px;
+}
+.mini {
+  width: 46px; height: 34px;
+  border-radius: 6px;
+  background: linear-gradient(160deg, var(--ivory), #eadfbe);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 700;
+  opacity: .85;
+}
+.mini.red { color: var(--red); }
+.mini.black { color: var(--black); }
+#restart {
+  margin-top: 16px;
+  padding: 8px 26px;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all .2s;
+}
+body.lang-en #restart { letter-spacing: .5px; }
+#restart:hover { border-color: var(--accent); color: var(--accent); }
+#overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,11,15,.78);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+#overlay.show { display: flex; }
+.overlay-box {
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  border-radius: 16px;
+  padding: 36px 48px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  animation: pop .3s ease-out;
+  max-width: min(92vw, 520px);
+}
+@keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.overlay-box h2 { color: var(--accent); font-size: 26px; letter-spacing: 4px; margin-bottom: 10px; }
+body.lang-en .overlay-box h2 { letter-spacing: 1px; }
+.overlay-box p { color: var(--muted); font-size: 14px; margin-bottom: 22px; }
+.overlay-box button {
+  padding: 10px 32px;
+  font-size: 15px;
+  letter-spacing: 3px;
+  background: var(--accent);
+  color: #1b1405;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+body.lang-en .overlay-box button { letter-spacing: .5px; }
+#app { display: flex; flex-direction: column; align-items: center; }
+@media (max-width: 720px) {
+  main { flex-direction: column; align-items: center; }
+  .tray { width: min(92vw, 480px); }
+}
+</style>
+</head>
+<body>
+<div id="app">
+<nav class="topbar">
+  <a class="rules-link" id="rules-link" href="rules.html"></a>
+  <div id="lang-toggle">
+    <button id="lang-zh">中文</button>
+    <button id="lang-en">EN</button>
+  </div>
+</nav>
+<header>
+  <h1 id="title">暗棋斗兽棋</h1>
+  <div id="players">
+    <div class="badge" id="badge-p1"><span class="chip" id="chip-p1"></span><span id="label-p1"></span></div>
+    <div class="badge" id="badge-p2"><span class="chip" id="chip-p2"></span><span id="label-p2"></span></div>
+  </div>
+  <div id="status" aria-live="polite"></div>
+</header>
+<main>
+  <div class="tray">
+    <h3 id="tray-red-title"></h3>
+    <div class="tray-list" id="tray-red"></div>
+  </div>
+  <div id="board" role="group"></div>
+  <div class="tray">
+    <h3 id="tray-black-title"></h3>
+    <div class="tray-list" id="tray-black"></div>
+  </div>
+</main>
+<button id="restart"></button>
+</div>
+<div id="overlay">
+  <div class="overlay-box" role="dialog" aria-modal="true" aria-labelledby="overlay-title" aria-describedby="overlay-reason">
+    <h2 id="overlay-title"></h2>
+    <p id="overlay-reason"></p>
+    <button id="overlay-restart"></button>
+  </div>
+</div>
+<script>
+'use strict';
+
+/* ---------- 常量与纯逻辑（不依赖 DOM，可单独测试） ---------- */
+
+const EMOJI = { 1: '🕸️', 2: '🐘', 3: '🦁', 4: '🐯', 5: '🐺', 6: '🐑', 7: '🐱', 8: '🐭' };
+const IDLE_DRAW_LIMIT = 40;   // 连续无翻子且无吃子的步数上限，达到判和
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// 返回 true（可吃）/ false（不可吃）/ 'mutual'（同级，同归于尽）
+function canCapture(a, b) {
+  if (a === b) return 'mutual';
+  if (a === 8) return b === 1;            // 鼠只吃网
+  if (a === 1) return b >= 2 && b <= 7;   // 网吃不了鼠
+  return b > a;
+}
+
+function neighbors(i) {
+  const r = Math.floor(i / 4), c = i % 4, out = [];
+  if (r > 0) out.push(i - 4);
+  if (r < 3) out.push(i + 4);
+  if (c > 0) out.push(i - 1);
+  if (c < 3) out.push(i + 1);
+  return out;
+}
+
+// i 处己方明子的所有合法落点（空格移动 + 可吃的已翻开对方子）
+function legalTargets(board, i) {
+  const m = board[i], out = [];
+  for (const j of neighbors(i)) {
+    const t = board[j];
+    if (!t) out.push(j);
+    else if (t.revealed && t.color !== m.color && canCapture(m.rank, t.rank)) out.push(j);
+  }
+  return out;
+}
+
+function hasHidden(board) {
+  return board.some(p => p && !p.revealed);
+}
+
+function hasLegalAction(board, color) {
+  if (hasHidden(board)) return true;   // 有暗子可翻就有合法动作
+  return board.some((p, i) => p && p.revealed && p.color === color && legalTargets(board, i).length > 0);
+}
+
+function aliveCount(board, color) {
+  return board.filter(p => p && p.color === color).length;
+}
+
+function makeBoard() {
+  const pieces = [];
+  for (const color of ['red', 'black'])
+    for (let rank = 1; rank <= 8; rank++)
+      pieces.push({ rank, color, revealed: false });
+  return shuffle(pieces);
+}
+
+/* ---------- 多语言 ----------
+   状态消息以 {k: 消息键, p: 参数} 结构存储，渲染时才翻译，
+   所以对局中途切换语言，所有文字（含最后一条动作消息、结算画面）都会即时更新。 */
+
+const I18N = {
+  zh: {
+    htmlLang: 'zh-CN',
+    docTitle: '暗棋斗兽棋',
+    heading: '暗棋斗兽棋',
+    restart: '重新开局',
+    confirmRestart: '当前对局还没结束，确定要重新开局吗？',
+    playAgain: '再来一局',
+    boardLabel: '棋盘',
+    cellLabel: (i, p, extra) => `第 ${Math.floor(i / 4) + 1} 行第 ${i % 4 + 1} 列：` +
+      (!p ? '空格' : p.revealed ? `${I18N.zh.piece(p)}（${p.rank}）` : '暗子') + extra,
+    selectedMark: '，已选中',
+    moveMark: '，可移动到这里',
+    captureMark: '，可以吃',
+    trayRed: '红方阵亡',
+    trayBlack: '黑方阵亡',
+    animal: { 1: '网', 2: '象', 3: '狮', 4: '虎', 5: '狼', 6: '羊', 7: '猫', 8: '鼠' },
+    colorName: { red: '红', black: '黑' },
+    player: n => `玩家 ${n}`,
+    playerWithColor: (n, c) => `玩家 ${n}（${I18N.zh.colorName[c]}方）`,
+    badge: (n, c) => `玩家 ${n} · ` + (c ? `${I18N.zh.colorName[c]}方` : '未定色'),
+    piece: pc => `${I18N.zh.colorName[pc.color]}${I18N.zh.animal[pc.rank]}`,
+    msg: {
+      assignPrompt: ({ round, n }) => `定色阶段 · 第 ${round} 轮：请玩家 ${n} 翻开一个棋子`,
+      sameColor: () => '两人翻出同色，重新来。',
+      assignDone: ({ c1, c2 }) => `定色完成：玩家 1 执${I18N.zh.colorName[c1]}，玩家 2 执${I18N.zh.colorName[c2]}。`,
+      assignExhausted: ({ c1, c2 }) => `暗子已全部翻开，按最后一轮分配：玩家 1 执${I18N.zh.colorName[c1]}，玩家 2 执${I18N.zh.colorName[c2]}。`,
+      turnPrompt: ({ player }) => `轮到${playerLabel(player)}：翻暗子，或移动/吃子`,
+      flipped: ({ player, piece }) => `${playerLabel(player)}翻开了${I18N.zh.piece(piece)}。`,
+      moved: ({ piece }) => `${I18N.zh.piece(piece)}移动了一步。`,
+      ate: ({ a, b }) => `${I18N.zh.piece(a)}吃掉了${I18N.zh.piece(b)}！`,
+      mutual: ({ a, b }) => `同归于尽！${I18N.zh.piece(a)}与${I18N.zh.piece(b)}双双阵亡。`,
+      bothDead: () => '双方棋子同时阵亡',
+      eatenOut: ({ player }) => `${playerLabel(player)}的棋子被吃光`,
+      noAction: ({ player }) => `${playerLabel(player)}无合法动作（无暗子可翻且无子可动）`,
+      idleDraw: ({ limit }) => `双方合计连续 ${limit} 步无翻子且无吃子`,
+      win: ({ player }) => `${playerLabel(player)}获胜！`,
+      draw: () => '平局！',
+    },
+    rulesLink: '📖 玩法说明',
+    rulesLinkNew: '📖 新手？先看玩法说明',
+  },
+  en: {
+    htmlLang: 'en',
+    docTitle: 'Dark Jungle Chess',
+    heading: 'Dark Jungle Chess',
+    restart: 'New Game',
+    confirmRestart: 'This game is not finished. Start a new game anyway?',
+    playAgain: 'Play Again',
+    boardLabel: 'Board',
+    cellLabel: (i, p, extra) => `Row ${Math.floor(i / 4) + 1}, column ${i % 4 + 1}: ` +
+      (!p ? 'empty' : p.revealed ? `${I18N.en.piece(p)} (${p.rank})` : 'hidden piece') + extra,
+    selectedMark: ', selected',
+    moveMark: ', can move here',
+    captureMark: ', can capture',
+    trayRed: 'Red casualties',
+    trayBlack: 'Black casualties',
+    animal: { 1: 'Net', 2: 'Elephant', 3: 'Lion', 4: 'Tiger', 5: 'Wolf', 6: 'Sheep', 7: 'Cat', 8: 'Mouse' },
+    colorName: { red: 'Red', black: 'Black' },
+    player: n => `Player ${n}`,
+    playerWithColor: (n, c) => `Player ${n} (${I18N.en.colorName[c]})`,
+    badge: (n, c) => `Player ${n} · ` + (c ? I18N.en.colorName[c] : 'no color yet'),
+    piece: pc => `${I18N.en.colorName[pc.color]} ${I18N.en.animal[pc.rank]}`,
+    msg: {
+      assignPrompt: ({ round, n }) => `Color phase · Round ${round}: Player ${n}, flip a piece`,
+      sameColor: () => 'Same color flipped — try again. ',
+      assignDone: ({ c1, c2 }) => `Colors set: Player 1 plays ${I18N.en.colorName[c1]}, Player 2 plays ${I18N.en.colorName[c2]}. `,
+      assignExhausted: ({ c1, c2 }) => `All pieces revealed; assigned by the last round: Player 1 plays ${I18N.en.colorName[c1]}, Player 2 plays ${I18N.en.colorName[c2]}. `,
+      turnPrompt: ({ player }) => `${playerLabel(player)}'s turn: flip a hidden piece, or move/capture`,
+      flipped: ({ player, piece }) => `${playerLabel(player)} flipped ${I18N.en.piece(piece)}. `,
+      moved: ({ piece }) => `${I18N.en.piece(piece)} moved. `,
+      ate: ({ a, b }) => `${I18N.en.piece(a)} captured ${I18N.en.piece(b)}! `,
+      mutual: ({ a, b }) => `Mutual destruction! ${I18N.en.piece(a)} and ${I18N.en.piece(b)} both fell. `,
+      bothDead: () => 'Both sides lost their last pieces simultaneously',
+      eatenOut: ({ player }) => `${playerLabel(player)} has no pieces left`,
+      noAction: ({ player }) => `${playerLabel(player)} has no legal action (nothing to flip or move)`,
+      idleDraw: ({ limit }) => `${limit} moves in a row (both players combined) with no flip or capture`,
+      win: ({ player }) => `${playerLabel(player)} wins!`,
+      draw: () => 'Draw!',
+    },
+    rulesLink: '📖 How to Play',
+    rulesLinkNew: '📖 New here? How to Play',
+  },
+};
+
+/* ---------- 存储（隐私模式等不可用时静默降级） ---------- */
+
+const LANG_KEY = 'dark-jungle-chess-lang';
+const RULES_SEEN_KEY = 'dark-jungle-chess-rules-seen';   // rules.html 打开后写入
+const SAVE_KEY = 'dark-jungle-chess-game-v1';           // 结构变化时改版本号，旧存档会被忽略
+
+function storageGet(kind, key) {
+  try { return window[kind].getItem(key); } catch (e) { return null; }
+}
+function storageSet(kind, key, value) {
+  try { window[kind].setItem(key, value); } catch (e) { /* 忽略 */ }
+}
+
+// 对局存在 sessionStorage：去看规则再返回、或刷新页面都不会丢局。
+// 存档是外部输入：逐字段校验，任何一项不对就整份丢弃，开新局。
+function saveGame() { storageSet('sessionStorage', SAVE_KEY, JSON.stringify(state)); }
+
+const COLORS = ['red', 'black'];
+const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
+const isPiece = p => !!p && typeof p === 'object' && isInt(p.rank, 1, 8) &&
+  COLORS.includes(p.color) && typeof p.revealed === 'boolean';
+const isPlayer = v => v === 'p1' || v === 'p2';
+const PARAM_CHECKS = {
+  a: isPiece, b: isPiece, piece: isPiece, player: isPlayer,
+  c1: c => COLORS.includes(c), c2: c => COLORS.includes(c),
+  round: v => isInt(v, 1, 99), n: v => v === 1 || v === 2, limit: v => v === IDLE_DRAW_LIMIT,
+};
+const isMsgPart = x => !!x && typeof x === 'object' && Object.hasOwn(I18N.zh.msg, x.k) &&
+  (x.p === undefined || (typeof x.p === 'object' && x.p !== null &&
+    Object.entries(x.p).every(([key, v]) => Object.hasOwn(PARAM_CHECKS, key) && PARAM_CHECKS[key](v))));
+const isParts = a => Array.isArray(a) && a.length <= 8 && a.every(isMsgPart);
+
+function isValidSave(s) {
+  if (!s || typeof s !== 'object' || !['assign', 'play', 'over'].includes(s.phase)) return false;
+  if (!Array.isArray(s.board) || s.board.length !== 16 || !s.board.every(p => p === null || isPiece(p))) return false;
+  if (!s.captured || !COLORS.every(c => Array.isArray(s.captured[c]) && s.captured[c].every(isPiece))) return false;
+  const total = s.board.filter(Boolean).length + s.captured.red.length + s.captured.black.length;
+  if (total !== 16) return false;
+  if (!s.players || !['p1', 'p2'].every(p => s.players[p] === null || COLORS.includes(s.players[p]))) return false;
+  if (s.phase !== 'assign' && (!s.players.p1 || !s.players.p2)) return false;
+  if (!isPlayer(s.current) || !isInt(s.round, 1, 99) || !isInt(s.idleSteps, 0, IDLE_DRAW_LIMIT)) return false;
+  if (!Array.isArray(s.roundFlips) || s.roundFlips.length > 2 || !s.roundFlips.every(c => COLORS.includes(c))) return false;
+  if (!(s.selected === null || isInt(s.selected, 0, 15))) return false;
+  if (!(s.winner === undefined || s.winner === null || isPlayer(s.winner))) return false;
+  return isParts(s.message) && isParts(s.overReason);
+}
+
+function loadGame() {
+  try {
+    const s = JSON.parse(storageGet('sessionStorage', SAVE_KEY));
+    return isValidSave(s) ? { ...s, lastFlipped: null } : null;
+  } catch (e) { return null; }
+}
+
+let lang = I18N[storageGet('localStorage', LANG_KEY)] ? storageGet('localStorage', LANG_KEY) : 'zh';
+
+function L() { return I18N[lang]; }
+
+function playerLabel(p) {
+  const n = p === 'p1' ? 1 : 2, c = state.players[p];
+  return c ? L().playerWithColor(n, c) : L().player(n);
+}
+
+// parts: [{k: 消息键, p: 参数}]
+function fmtMsg(parts) { return parts.map(x => L().msg[x.k](x.p || {})).join(''); }
+
+function setLang(l) {
+  lang = l;
+  storageSet('localStorage', LANG_KEY, l);
+  render();
+}
+
+/* ---------- 游戏状态与流程 ---------- */
+
+let state = null;
+
+function newGame() {
+  state = {
+    phase: 'assign',                       // 'assign' | 'play' | 'over'
+    board: makeBoard(),
+    players: { p1: null, p2: null },
+    current: 'p1',
+    round: 1,
+    roundFlips: [],                        // 定色阶段本轮翻出的颜色
+    selected: null,
+    captured: { red: [], black: [] },
+    idleSteps: 0,                          // 连续无翻子且无吃子的步数
+    lastFlipped: null,                     // 刚翻开的格子（用于翻转动画）
+    winner: undefined,                     // 'p1' | 'p2' | null=平局
+    overReason: [],                        // 结算原因（消息 parts）
+    message: [{ k: 'assignPrompt', p: { round: 1, n: 1 } }],
+  };
+  render();
+}
+
+function onCellClick(i) {
+  if (!state || state.phase === 'over') return;
+  if (state.phase === 'assign') assignFlip(i);
+  else playClick(i);
+}
+
+/* 定色阶段：轮流翻子，某轮两人异色则各得所翻颜色 */
+function assignFlip(i) {
+  const p = state.board[i];
+  if (!p || p.revealed) return;
+  p.revealed = true;
+  state.lastFlipped = i;
+  state.roundFlips.push(p.color);
+
+  if (state.roundFlips.length < 2) {
+    state.current = 'p2';
+    state.message = [{ k: 'assignPrompt', p: { round: state.round, n: 2 } }];
+    render();
+    return;
+  }
+
+  const [c1, c2] = state.roundFlips;
+  if (c1 !== c2) {
+    startPlayPhase(c1, c2, [{ k: 'assignDone', p: { c1, c2 } }]);
+    return;
+  }
+
+  state.roundFlips = [];
+  state.round++;
+  state.current = 'p1';
+  if (!hasHidden(state.board)) {
+    // 极端情况：暗子翻完仍每轮同色，按最后翻色分配（玩家 1 得该色）
+    const other = c1 === 'red' ? 'black' : 'red';
+    startPlayPhase(c1, other, [{ k: 'assignExhausted', p: { c1, c2: other } }]);
+    return;
+  }
+  state.message = [{ k: 'sameColor' }, { k: 'assignPrompt', p: { round: state.round, n: 1 } }];
+  render();
+}
+
+function startPlayPhase(c1, c2, prefixParts) {
+  state.players.p1 = c1;
+  state.players.p2 = c2;
+  state.phase = 'play';
+  state.current = 'p1';
+  if (!hasLegalAction(state.board, c1)) {   // 理论上仅暗子翻完的极端情况可能触发
+    gameOver('p2', [{ k: 'noAction', p: { player: 'p1' } }]);
+    return;
+  }
+  state.message = [...prefixParts, { k: 'turnPrompt', p: { player: 'p1' } }];
+  render();
+}
+
+/* 对战阶段：点击处理（选子 / 落子 / 翻子） */
+function playClick(i) {
+  const myColor = state.players[state.current];
+  const p = state.board[i];
+
+  if (state.selected !== null) {
+    if (legalTargets(state.board, state.selected).includes(i)) { doMove(state.selected, i); return; }
+    // 已选中时误点暗子不能翻子（会白白用掉回合）；点另一个己方明子则改选它
+    state.selected = (i !== state.selected && p && p.revealed && p.color === myColor) ? i : null;
+    render();
+    return;
+  }
+  if (p && !p.revealed) {
+    p.revealed = true;
+    state.lastFlipped = i;
+    state.idleSteps = 0;
+    endTurn([{ k: 'flipped', p: { player: state.current, piece: p } }]);
+    return;
+  }
+  if (p && p.revealed && p.color === myColor) { state.selected = i; render(); return; }
+  state.selected = null;
+  render();
+}
+
+function doMove(from, to) {
+  const m = state.board[from], t = state.board[to];
+  let actionParts;
+  if (!t) {
+    state.board[to] = m;
+    state.board[from] = null;
+    state.idleSteps++;
+    actionParts = [{ k: 'moved', p: { piece: m } }];
+  } else {
+    state.idleSteps = 0;
+    const res = canCapture(m.rank, t.rank);
+    if (res === 'mutual') {
+      state.captured[m.color].push(m);
+      state.captured[t.color].push(t);
+      state.board[from] = null;
+      state.board[to] = null;
+      actionParts = [{ k: 'mutual', p: { a: m, b: t } }];
+    } else {
+      state.captured[t.color].push(t);
+      state.board[to] = m;
+      state.board[from] = null;
+      actionParts = [{ k: 'ate', p: { a: m, b: t } }];
+    }
+  }
+  endTurn(actionParts);
+}
+
+function endTurn(actionParts) {
+  state.selected = null;
+  const cur = state.current, opp = cur === 'p1' ? 'p2' : 'p1';
+  const curColor = state.players[cur], oppColor = state.players[opp];
+  const curAlive = aliveCount(state.board, curColor);
+  const oppAlive = aliveCount(state.board, oppColor);
+
+  if (curAlive === 0 && oppAlive === 0) { gameOver(null, [...actionParts, { k: 'bothDead' }]); return; }
+  if (oppAlive === 0) { gameOver(cur, [...actionParts, { k: 'eatenOut', p: { player: opp } }]); return; }
+  if (curAlive === 0) { gameOver(opp, [...actionParts, { k: 'eatenOut', p: { player: cur } }]); return; }
+  if (state.idleSteps >= IDLE_DRAW_LIMIT) {
+    gameOver(null, [...actionParts, { k: 'idleDraw', p: { limit: IDLE_DRAW_LIMIT } }]);
+    return;
+  }
+
+  state.current = opp;
+  if (!hasLegalAction(state.board, oppColor)) {
+    gameOver(cur, [...actionParts, { k: 'noAction', p: { player: opp } }]);
+    return;
+  }
+  state.message = [...actionParts, { k: 'turnPrompt', p: { player: opp } }];
+  render();
+}
+
+function gameOver(winner, reasonParts) {
+  state.phase = 'over';
+  state.winner = winner;
+  state.overReason = reasonParts;
+  state.message = [winner === null ? { k: 'draw' } : { k: 'win', p: { player: winner } }];
+  render();
+}
+
+/* ---------- 渲染 ----------
+   只用 textContent / createElement，不拼 HTML 字符串（页面的 CSP 开启了 Trusted Types，innerHTML 会直接报错） */
+
+function span(className, text) {
+  const el = document.createElement('span');
+  if (className) el.className = className;
+  el.textContent = String(text);
+  return el;
+}
+
+function render() {
+  renderStatic();
+  // 状态栏是 aria-live，文字没变就不要重写，否则读屏会重复播报
+  const statusEl = document.getElementById('status');
+  const statusText = fmtMsg(state.message);
+  if (statusEl.textContent !== statusText) statusEl.textContent = statusText;
+  renderBadges();
+  renderBoard();
+  renderTrays();
+  renderOverlay();
+  state.lastFlipped = null;   // 翻转动画只播一次
+  saveGame();
+}
+
+function renderStatic() {
+  document.documentElement.lang = L().htmlLang;
+  document.title = L().docTitle;
+  document.getElementById('title').textContent = L().heading;
+  document.getElementById('restart').textContent = L().restart;
+  document.getElementById('overlay-restart').textContent = L().playAgain;
+  document.getElementById('tray-red-title').textContent = L().trayRed;
+  document.getElementById('tray-black-title').textContent = L().trayBlack;
+  document.body.classList.toggle('lang-en', lang === 'en');
+  for (const l of ['zh', 'en']) {
+    const btn = document.getElementById(`lang-${l}`);
+    btn.classList.toggle('active', lang === l);
+    btn.setAttribute('aria-pressed', String(lang === l));
+  }
+  const seen = storageGet('localStorage', RULES_SEEN_KEY) === '1';
+  const link = document.getElementById('rules-link');
+  link.textContent = seen ? L().rulesLink : L().rulesLinkNew;
+  link.classList.toggle('new', !seen);
+}
+
+function renderBadges() {
+  for (const p of ['p1', 'p2']) {
+    const color = state.players[p];
+    const badge = document.getElementById(`badge-${p}`);
+    const chip = document.getElementById(`chip-${p}`);
+    const label = document.getElementById(`label-${p}`);
+    badge.classList.toggle('active', state.phase !== 'over' && state.current === p);
+    chip.className = 'chip' + (color ? ` ${color}` : '');
+    label.textContent = L().badge(p === 'p1' ? 1 : 2, color);
+  }
+}
+
+function renderBoard() {
+  const boardEl = document.getElementById('board');
+  // 每次重绘都会重建格子，记下键盘焦点所在格，重绘后还原
+  const active = document.activeElement;
+  const focusIdx = active && boardEl.contains(active) ? Number(active.dataset.i) : null;
+  boardEl.replaceChildren();
+  boardEl.setAttribute('aria-label', L().boardLabel);
+  const targets = (state.phase === 'play' && state.selected !== null)
+    ? legalTargets(state.board, state.selected) : [];
+
+  state.board.forEach((p, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.dataset.i = i;
+    cell.setAttribute('role', 'button');
+    cell.tabIndex = i === (focusIdx ?? 0) ? 0 : -1;
+    const isTarget = targets.includes(i);
+    if (isTarget) cell.classList.add(state.board[i] ? 'target-capture' : 'target-move');
+    const extra = i === state.selected ? L().selectedMark
+      : isTarget ? (p ? L().captureMark : L().moveMark) : '';
+    cell.setAttribute('aria-label', L().cellLabel(i, p, extra));
+
+    if (p) {
+      const card = document.createElement('div');
+      card.setAttribute('aria-hidden', 'true');
+      if (!p.revealed) {
+        card.className = 'card hidden-piece';
+        card.textContent = '🐾';
+      } else {
+        card.className = `card revealed ${p.color}`;
+        card.append(span('rank', p.rank), span('emoji', EMOJI[p.rank]), span('name', L().animal[p.rank]));
+      }
+      if (i === state.selected) card.classList.add('selected');
+      if (i === state.lastFlipped) card.classList.add('flip-in');
+      cell.appendChild(card);
+    }
+    boardEl.appendChild(cell);
+    if (i === focusIdx) cell.focus();
+  });
+}
+
+function renderTrays() {
+  for (const color of ['red', 'black']) {
+    const el = document.getElementById(`tray-${color}`);
+    el.replaceChildren();
+    for (const p of state.captured[color]) {
+      const mini = document.createElement('div');
+      mini.className = `mini ${color}`;
+      // 英文动物名太长放不进小卡片，用等级数字代替
+      mini.append(span('', EMOJI[p.rank]), span('', lang === 'zh' ? L().animal[p.rank] : p.rank));
+      el.appendChild(mini);
+    }
+  }
+}
+
+function renderOverlay() {
+  const overlay = document.getElementById('overlay');
+  // 结算对话框打开时，背后的页面不可聚焦、不可点
+  document.getElementById('app').inert = state.phase === 'over';
+  if (state.phase !== 'over') { overlay.classList.remove('show'); return; }
+  document.getElementById('overlay-title').textContent =
+    fmtMsg([state.winner === null ? { k: 'draw' } : { k: 'win', p: { player: state.winner } }]);
+  document.getElementById('overlay-reason').textContent = fmtMsg(state.overReason);
+  if (!overlay.classList.contains('show')) {
+    overlay.classList.add('show');
+    document.getElementById('overlay-restart').focus();
+  }
+}
+
+/* ---------- 启动 ---------- */
+
+if (typeof document !== 'undefined') {
+  const boardEl = document.getElementById('board');
+  boardEl.addEventListener('click', e => {
+    const cell = e.target.closest('.cell');
+    if (cell) onCellClick(Number(cell.dataset.i));
+  });
+  const STEP = { ArrowUp: -4, ArrowDown: 4, ArrowLeft: -1, ArrowRight: 1 };
+  boardEl.addEventListener('keydown', e => {
+    const cell = e.target.closest('.cell');
+    if (!cell) return;
+    const i = Number(cell.dataset.i);
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onCellClick(i);
+    } else if (e.key in STEP) {
+      e.preventDefault();
+      const j = i + STEP[e.key];
+      const sameRow = Math.floor(j / 4) === Math.floor(i / 4);
+      if (j < 0 || j > 15 || (Math.abs(STEP[e.key]) === 1 && !sameRow)) return;
+      cell.tabIndex = -1;
+      const next = boardEl.children[j];
+      next.tabIndex = 0;
+      next.focus();
+    }
+  });
+  document.getElementById('restart').addEventListener('click', () => {
+    const inProgress = state.phase !== 'over' && state.board.some(p => !p || p.revealed);
+    if (!inProgress || window.confirm(L().confirmRestart)) newGame();
+  });
+  document.getElementById('overlay-restart').addEventListener('click', () => {
+    newGame();
+    boardEl.children[0].focus();
+  });
+  document.getElementById('lang-zh').addEventListener('click', () => setLang('zh'));
+  document.getElementById('lang-en').addEventListener('click', () => setLang('en'));
+  // 从规则页按返回键回来时，页面可能直接从 bfcache 恢复，需要刷新链接状态
+  window.addEventListener('pageshow', () => { if (state) renderStatic(); });
+  state = loadGame();
+  try {
+    if (state) render(); else newGame();
+  } catch (e) {
+    newGame();   // 校验漏掉的坏存档也不能让页面卡死
+  }
+}
+</script>
+</body>
+</html>
