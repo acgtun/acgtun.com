@@ -17,6 +17,7 @@ const hashes = (html, tag) =>
 // frame-ancestors and report-uri are ignored in a <meta> policy, so they are left out.
 function policyFor(html) {
   const scripts = hashes(html, 'script');
+  if (/<script\s[^>]*src=/.test(html)) scripts.unshift("'self'");
   const styles = hashes(html, 'style');
   return [
     "default-src 'none'",
