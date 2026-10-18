@@ -2,23 +2,35 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'sha256-sPbW91pLr45CNPn11FdSwKQ/6uEqBtm4QklGUw57wq4='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-B8/4TYzv/n5GNpd0CqlIdB2GA/zt41JXG+q6R53/aC0='; style-src 'sha256-ibIqBJ6nT8v8EIPUwtN9Qt1j5WaEEwBuuaZE/T6oZ7A='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>acgtun.com</title>
 <meta name="description" content="acgtun.com：暗棋斗兽棋 · Dark Jungle Chess">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 640px; margin: 80px auto; padding: 0 20px; color: #222; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; max-width: 640px; margin: 80px auto; padding: 0 20px; color: #222; }
   h1 { font-size: 1.6em; }
   a { color: #0366d6; text-decoration: none; }
   a:hover { text-decoration: underline; }
   li { margin: 8px 0; }
+  .tagline { color: #666; font-size: .9em; margin-top: 2px; }
 </style>
 </head>
 <body>
 <h1>acgtun.com</h1>
 <ul>
-  <li><a href="/dark-jungle-chess/">暗棋斗兽棋 · Dark Jungle Chess</a></li>
+  <li>
+    <a id="game-link" href="/dark-jungle-chess/">暗棋斗兽棋 · Dark Jungle Chess</a>
+    <div class="tagline" id="game-tagline"></div>
+  </li>
 </ul>
+<script src="/dark-jungle-chess/i18n.js"></script>
+<script>
+'use strict';
+const lang = DJC.loadLang();
+DJC.applyLang(lang);
+document.getElementById('game-link').textContent = DJC.T[lang].title;
+document.getElementById('game-tagline').textContent = DJC.T[lang].tagline;
+</script>
 </body>
 </html>

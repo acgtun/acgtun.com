@@ -7,6 +7,8 @@ const assert = require('assert');
 const GAME_DIR = path.join(__dirname, '..', 'docs', 'dark-jungle-chess');
 const html = fs.readFileSync(path.join(GAME_DIR, 'index.html'), 'utf8');
 const rulesHtml = fs.readFileSync(path.join(GAME_DIR, 'rules.html'), 'utf8');
+const I18N_FILE = path.join(GAME_DIR, 'i18n.js');
+const I18N_SRC = fs.readFileSync(I18N_FILE, 'utf8');
 const scriptOf = page => page.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 // Seeded RNG so a failing random game can be replayed: SEED=<n> node tests/game.test.js
@@ -22,7 +24,7 @@ Math.random = () => {
 // Just enough DOM for render() to run; innerHTML assignment clears children like the real one.
 function fakeEl() {
   return {
-    textContent: '', className: '', dataset: {}, children: [], attrs: {}, tabIndex: -1,
+    textContent: '', className: '', value: '', dataset: {}, children: [], attrs: {}, tabIndex: -1,
     set innerHTML(_) { this.children = []; }, get innerHTML() { return ''; },
     classList: { toggle() {}, add() {}, remove() {}, contains: () => false },
     setAttribute(k, v) { this.attrs[k] = v; },
@@ -43,11 +45,17 @@ global.document = {
   getElementById: id => (els[id] ||= fakeEl()),
   createElement: () => fakeEl(),
 };
-const loadPage = () => new Function(scriptOf(html) +
-  '\nreturn { get state() { return state; }, set state(s) { state = s; }, onCellClick, newGame, loadGame, canCapture, legalTargets, IDLE_DRAW_LIMIT, I18N, SAVE_KEY };')();
+const loadPage = () => new Function(I18N_SRC + '\n' + scriptOf(html) +
+  '\nreturn { get state() { return state; }, set state(s) { state = s; }, get lang() { return lang; }, onCellClick, newGame, loadGame, ' +
+  'canCapture, legalTargets, setLang, fmtMsg, IDLE_DRAW_LIMIT, DJC, SAVE_KEY };')();
 const game = loadPage();
+const { DJC } = game;
 const { PAGES, META, metaFor } = require('../tools/csp.js');
-const rules = new Function(scriptOf(rulesHtml) + '\nreturn { IDLE_DRAW_LIMIT, RULES };')();
+const rules = new Function(I18N_SRC + '\n' + scriptOf(rulesHtml) +
+  '\nreturn { IDLE_DRAW_LIMIT, render, setLang: l => { lang = l; } };')();
+
+const textOf = n => (n && typeof n === 'object' ? n.textContent + n.children.map(textOf).join('') : String(n));
+const LEFTOVER = /\{\w+\}|\*\*|\b(undefined|NaN|null)\b/;
 
 const P = (rank, color, revealed = true) => ({ rank, color, revealed });
 function playState(board, extra = {}) {
@@ -202,7 +210,7 @@ const tests = {
   },
 
   'no page builds HTML from strings (Trusted Types would block it)'() {
-    for (const file of PAGES) {
+    for (const file of [...PAGES, I18N_FILE]) {
       const src = fs.readFileSync(file, 'utf8');
       assert.ok(!/\.(innerHTML|outerHTML)\s*=|insertAdjacentHTML|document\.write/.test(src), path.basename(file));
     }
@@ -217,11 +225,91 @@ const tests = {
     }
   },
 
-  'rules page matches the game (draw limit, animal names, links)'() {
+  'rules page matches the game (draw limit, links)'() {
     assert.strictEqual(rules.IDLE_DRAW_LIMIT, game.IDLE_DRAW_LIMIT);
-    for (const l of ['zh', 'en']) assert.deepStrictEqual(rules.RULES[l].animal, game.I18N[l].animal, `${l} animal names`);
     assert.ok(html.includes('href="rules.html"'), 'game does not link to rules.html');
     assert.ok(rulesHtml.includes('href="./"'), 'rules page does not link back to the game');
+  },
+
+  'all 30 languages have the same keys, placeholders and bold markers as English'() {
+    const codes = Object.keys(DJC.T);
+    assert.strictEqual(codes.length, 30);
+    const ph = s => (s.match(/\{\w+\}/g) || []).sort().join();
+    const bold = s => (s.match(/\*\*/g) || []).length;
+    function same(a, b, where) {
+      if (typeof b === 'string') {
+        assert.strictEqual(typeof a, 'string', where);
+        assert.ok(a.trim() && !/[<>]/.test(a), `${where}: empty or contains < >`);
+        if (!/\.(name|htmlLang)$/.test(where)) {
+          assert.strictEqual(ph(a), ph(b), `${where}: placeholders`);
+          assert.strictEqual(bold(a), bold(b), `${where}: ** markers`);
+        }
+        return;
+      }
+      if (Array.isArray(b)) {
+        assert.ok(Array.isArray(a) && a.length === b.length, `${where}: length`);
+        b.forEach((x, i) => same(a[i], x, `${where}[${i}]`));
+        return;
+      }
+      assert.deepStrictEqual(Object.keys(a).sort(), Object.keys(b).sort(), `${where}: keys`);
+      for (const k of Object.keys(b)) same(a[k], b[k], `${where}.${k}`);
+    }
+    for (const code of codes) same(DJC.T[code], DJC.T.en, code);
+    assert.strictEqual(new Set(codes.map(c => DJC.T[c].name)).size, 30, 'duplicate language names');
+  },
+
+  'every language renders the game, every message and the rules page with no leftovers'() {
+    const sample = { round: 2, n: 1, c1: 'red', c2: 'black', player: 'p1', piece: P(3, 'red'), a: P(3, 'red'), b: P(5, 'black'), limit: 40 };
+    for (const code of Object.keys(DJC.T)) {
+      const b = emptyBoard();
+      b[0] = P(5, 'red'); b[1] = P(6, 'black'); b[4] = P(2, 'black', false);
+      const s = playState(b, { captured: { red: [P(7, 'red')], black: [P(8, 'black')] }, selected: 0 });
+      game.setLang(code);
+      const texts = [document.title, els.status.textContent, els['label-p1'].textContent, els['label-p2'].textContent,
+        els.restart.textContent, els['rules-link'].textContent, ...els.board.children.map(c => c.attrs['aria-label'] + textOf(c)),
+        textOf(els['tray-red']), textOf(els['tray-black'])];
+      for (const k of Object.keys(DJC.T.en.msg)) texts.push(game.fmtMsg([{ k, p: sample }]));
+      s.players.p1 = null;
+      texts.push(game.fmtMsg([{ k: 'turnPrompt', p: { player: 'p1' } }]));
+      for (const t of texts) assert.ok(t && !LEFTOVER.test(t), `${code}: "${t}"`);
+      assert.strictEqual(game.lang, code);
+      assert.strictEqual(document.documentElement.lang, DJC.T[code].htmlLang);
+
+      rules.setLang(code);
+      rules.render();
+      const page = textOf(els.rules);
+      assert.ok(!LEFTOVER.test(page), `${code} rules page: ${(page.match(LEFTOVER) || [])[0]}`);
+      assert.ok(page.includes(DJC.T[code].animal[7]) && page.includes('40'), `${code} rules page is missing names or the limit`);
+    }
+  },
+
+  'messages read naturally in English and Chinese'() {
+    playState(emptyBoard());
+    const parts = [{ k: 'flipped', p: { player: 'p1', piece: P(2, 'red') } }, { k: 'turnPrompt', p: { player: 'p2' } }];
+    game.setLang('en');
+    assert.strictEqual(game.fmtMsg(parts), "Player 1 (Red) flipped Red Elephant. Player 2 (Black)'s turn: flip a hidden piece, or move/capture");
+    game.setLang('zh');
+    assert.strictEqual(game.fmtMsg(parts), '玩家 1（红方）翻开了红象。轮到玩家 2（黑方）：翻暗子，或移动/吃子');
+  },
+
+  'language choice: saved choice, then browser languages, then English'() {
+    const cases = [
+      ['ja', ['fr'], 'ja'], ['xx', ['fr-FR'], 'fr'], [null, ['zh-TW'], 'zh-Hant'], [null, ['zh-Hant-HK'], 'zh-Hant'],
+      [null, ['zh-CN'], 'zh'], [null, ['pt-BR'], 'pt'], [null, ['tl-PH'], 'fil'], [null, ['nl', 'de'], 'de'],
+      [null, ['nl'], 'en'], [null, undefined, 'en'], ['__proto__', ['__proto__'], 'en'],
+    ];
+    for (const [stored, prefs, want] of cases) assert.strictEqual(DJC.pickLang(stored, prefs), want, `${stored} ${prefs}`);
+  },
+
+  'Arabic, Urdu and Persian switch the page to right-to-left'() {
+    playState(emptyBoard());
+    for (const code of ['ar', 'ur', 'fa']) {
+      game.setLang(code);
+      assert.strictEqual(document.documentElement.dir, 'rtl', code);
+    }
+    game.setLang('en');
+    assert.strictEqual(document.documentElement.dir, 'ltr');
+    assert.ok(/#board \{\s*direction: ltr;/.test(html), 'board must stay left-to-right so row/column labels match');
   },
 
   'random full games: pieces are conserved, turns pass, games end'() {
