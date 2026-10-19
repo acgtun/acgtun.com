@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-B8/4TYzv/n5GNpd0CqlIdB2GA/zt41JXG+q6R53/aC0='; style-src 'sha256-ibIqBJ6nT8v8EIPUwtN9Qt1j5WaEEwBuuaZE/T6oZ7A='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-e34njGkJYaFmzfUDpB6pHVUelTyfgDkKjNaMcfeKjz8='; style-src 'sha256-ibIqBJ6nT8v8EIPUwtN9Qt1j5WaEEwBuuaZE/T6oZ7A='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>acgtun.com</title>
 <meta name="description" content="acgtun.com：暗棋斗兽棋 · Dark Jungle Chess">
@@ -24,13 +24,18 @@
     <div class="tagline" id="game-tagline"></div>
   </li>
 </ul>
-<script src="/dark-jungle-chess/i18n.js?v=d959892388"></script>
+<script src="/dark-jungle-chess/i18n.js?v=a2e9667e6c"></script>
 <script>
 'use strict';
-const lang = DJC.loadLang();
-DJC.applyLang(lang);
-document.getElementById('game-link').textContent = DJC.T[lang].title;
-document.getElementById('game-tagline').textContent = DJC.T[lang].tagline;
+function render() {
+  const lang = DJC.loadLang();
+  DJC.applyLang(lang);
+  document.getElementById('game-link').textContent = DJC.T[lang].title;
+  document.getElementById('game-tagline').textContent = DJC.T[lang].tagline;
+}
+render();
+// Back from the game can restore this page from the bfcache with the old language.
+window.addEventListener('pageshow', e => { if (e.persisted) render(); });
 </script>
 </body>
 </html>

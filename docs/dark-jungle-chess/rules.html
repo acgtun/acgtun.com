@@ -5,7 +5,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-AZhHnS01cMgoK4tSiEEl5PGKIRACp1Xivc0c7oCLm0Q='; style-src 'sha256-dOlZG/L+LbOqZb4uk63m1Cst6Fd35pMh+wWCf3jzQRs='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-2lwaXp2ThMuwDs/CxwvbtTw9ViDgSwHqYS7f/gjRlyQ='; style-src 'sha256-dOlZG/L+LbOqZb4uk63m1Cst6Fd35pMh+wWCf3jzQRs='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>玩法说明 · 暗棋斗兽棋</title>
 <meta name="description" content="暗棋斗兽棋 · Dark Jungle Chess 玩法说明：棋子等级、吃子规则、定色、对战与胜负。How to play Dark Jungle Chess.">
@@ -132,7 +132,7 @@ li b { color: var(--accent); }
   <div id="lang-picker"></div>
 </nav>
 <main id="rules"></main>
-<script src="i18n.js?v=d959892388"></script>
+<script src="i18n.js?v=a2e9667e6c"></script>
 <script>
 'use strict';
 
@@ -178,6 +178,8 @@ function withBold(text) {
 if (typeof document !== 'undefined') {
   try { window.localStorage.setItem(RULES_SEEN_KEY, '1'); } catch (e) { /* 忽略 */ }
   updateLangPicker = DJC.mountLangPicker(document.getElementById('lang-picker'), l => { lang = l; DJC.saveLang(l); render(); });
+  // 按返回键从游戏页回来时可能直接从 bfcache 恢复，需要读入在游戏页改过的语言
+  window.addEventListener('pageshow', e => { if (e.persisted) { lang = DJC.loadLang(); render(); } });
   render();
 }
 </script>

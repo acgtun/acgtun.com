@@ -12,6 +12,7 @@ T.zh = {
   tagline: "4×4 翻棋版斗兽棋，双人同屏对战。",
   language: "语言", restart: "重新开局", playAgain: "再来一局",
   confirmRestart: "当前对局还没结束，确定要重新开局吗？",
+  cancel: "取消",
   rulesLink: "📖 玩法说明", rulesLinkNew: "📖 新手？先看玩法说明",
   board: "棋盘", cell: "第 {row} 行第 {col} 列：{what}",
   empty: "空格", hidden: "暗子", shown: "{piece}（{rank}）",
@@ -60,7 +61,7 @@ T.zh = {
       ["第二步 · 对战（每回合二选一）", [
         "**翻子**：翻开任意一个暗子（翻出来的可能是对方的棋子）。",
         "**移动/吃子**：先点己方明子，再点高亮格子——绿点是移动到空格，红框是吃掉对方棋子。每次只能上下左右走一格，只能吃已翻开的棋子。",
-        "选中棋子后点其他格子只会取消选中，不会翻子。",
+        "选中棋子后，点己方另一个明子会改选它；点其他格子只会取消选中，不会翻子。",
         "也可以用键盘：方向键移动光标，回车或空格键代替点击。",
       ]],
       ["胜负", [
@@ -79,6 +80,7 @@ T.en = {
   tagline: "A 4×4 hidden-piece Jungle chess for two players on one screen.",
   language: "Language", restart: "New Game", playAgain: "Play Again",
   confirmRestart: "This game is not finished. Start a new game anyway?",
+  cancel: "Cancel",
   rulesLink: "📖 How to Play", rulesLinkNew: "📖 New here? How to Play",
   board: "Board", cell: "Row {row}, column {col}: {what}",
   empty: "empty", hidden: "hidden piece", shown: "{piece} ({rank})",
@@ -127,7 +129,7 @@ T.en = {
       ["Step 2 · Battle (each turn, do one)", [
         "**Flip** any hidden piece. It may turn out to be your opponent's.",
         "**Move or capture**: tap one of your face-up pieces, then a highlighted square. A green dot moves to an empty square; a red border captures. Pieces move one square up, down, left or right, and can only capture face-up pieces.",
-        "While a piece is selected, tapping any other square only deselects it. It never flips a piece.",
+        "While a piece is selected, tapping another of your face-up pieces selects it instead. Tapping any other square only deselects; it never flips a piece.",
         "Keyboard works too: arrow keys move the cursor, and Enter or Space acts as a tap.",
       ]],
       ["Winning", [
@@ -146,6 +148,7 @@ T.hi = {
   tagline: "4×4 छिपे मोहरों वाला जंगल शतरंज, एक ही स्क्रीन पर दो खिलाड़ी।",
   language: "भाषा", restart: "नया खेल", playAgain: "फिर से खेलें",
   confirmRestart: "यह खेल अभी खत्म नहीं हुआ है। फिर भी नया खेल शुरू करें?",
+  cancel: "रद्द करें",
   rulesLink: "📖 कैसे खेलें", rulesLinkNew: "📖 नए हैं? कैसे खेलें",
   board: "बोर्ड", cell: "पंक्ति {row}, स्तंभ {col}: {what}",
   empty: "खाली", hidden: "छिपा मोहरा", shown: "{piece} ({rank})",
@@ -194,7 +197,7 @@ T.hi = {
       ["चरण 2 · मुकाबला (हर बारी में एक काम)", [
         "**पलटें**: कोई भी छिपा मोहरा पलटें। वह विरोधी का भी निकल सकता है।",
         "**चलें या मारें**: अपना खुला मोहरा छुएँ, फिर चमकता खाना। हरा बिंदु खाली खाने में जाना है; लाल किनारा मारना है। मोहरे ऊपर, नीचे, बाएँ या दाएँ एक खाना चलते हैं, और सिर्फ़ खुले मोहरों को मार सकते हैं।",
-        "मोहरा चुना हो तो किसी और खाने को छूने से सिर्फ़ चुनाव हटता है, कोई मोहरा नहीं पलटता।",
+        "मोहरा चुना हो तो अपने किसी दूसरे खुले मोहरे को छूने से वही चुन लिया जाता है; किसी और खाने को छूने से सिर्फ़ चुनाव हटता है, कोई मोहरा नहीं पलटता।",
         "कीबोर्ड भी चलता है: तीर कुंजियों से कर्सर हिलाएँ, Enter या Space छूने का काम करते हैं।",
       ]],
       ["जीत-हार", [
@@ -213,6 +216,7 @@ T.es = {
   tagline: "Ajedrez de la selva 4×4 con fichas ocultas, para dos jugadores en una misma pantalla.",
   language: "Idioma", restart: "Nueva partida", playAgain: "Jugar otra vez",
   confirmRestart: "La partida no ha terminado. ¿Empezar una nueva de todos modos?",
+  cancel: "Cancelar",
   rulesLink: "📖 Cómo jugar", rulesLinkNew: "📖 ¿Eres nuevo? Cómo jugar",
   board: "Tablero", cell: "Fila {row}, columna {col}: {what}",
   empty: "vacía", hidden: "ficha oculta", shown: "{piece} ({rank})",
@@ -261,7 +265,7 @@ T.es = {
       ["Paso 2 · Batalla (en cada turno, haz una cosa)", [
         "**Voltear** cualquier ficha oculta. Puede resultar ser de tu rival.",
         "**Mover o capturar**: toca una de tus fichas descubiertas y luego una casilla resaltada. Un punto verde mueve a una casilla vacía; un borde rojo captura. Las fichas se mueven una casilla arriba, abajo, izquierda o derecha, y solo pueden capturar fichas descubiertas.",
-        "Con una ficha seleccionada, tocar otra casilla solo la deselecciona. Nunca voltea una ficha.",
+        "Con una ficha seleccionada, tocar otra de tus fichas descubiertas la selecciona en su lugar. Tocar cualquier otra casilla solo quita la selección; nunca voltea una ficha.",
         "También funciona con teclado: las flechas mueven el cursor, y Enter o Espacio equivalen a tocar.",
       ]],
       ["Cómo ganar", [
@@ -280,6 +284,7 @@ T.ar = {
   tagline: "شطرنج غابة 4×4 بقطع مخفية، للاعبين اثنين على شاشة واحدة.",
   language: "اللغة", restart: "لعبة جديدة", playAgain: "العب مجددًا",
   confirmRestart: "لم تنتهِ هذه اللعبة بعد. هل تريد بدء لعبة جديدة؟",
+  cancel: "إلغاء",
   rulesLink: "📖 طريقة اللعب", rulesLinkNew: "📖 جديد هنا؟ طريقة اللعب",
   board: "الرقعة", cell: "الصف {row}، العمود {col}: {what}",
   empty: "فارغ", hidden: "قطعة مخفية", shown: "{piece} ({rank})",
@@ -328,7 +333,7 @@ T.ar = {
       ["الخطوة 2 · المعركة (في كل دور، افعل شيئًا واحدًا)", [
         "**اقلب** أي قطعة مخفية. قد تكون لخصمك.",
         "**التحريك أو الأسر**: اضغط إحدى قطعك المكشوفة، ثم مربعًا مضيئًا. النقطة الخضراء تحرك إلى مربع فارغ؛ والإطار الأحمر يأسر. تتحرك القطع مربعًا واحدًا لأعلى أو لأسفل أو لليسار أو لليمين، ولا تأسر إلا القطع المكشوفة.",
-        "عند تحديد قطعة، الضغط على أي مربع آخر يلغي التحديد فقط، ولا يقلب أي قطعة.",
+        "عند تحديد قطعة، الضغط على قطعة مكشوفة أخرى من قطعك يحددها بدلًا منها. الضغط على أي مربع آخر يلغي التحديد فقط، ولا يقلب أي قطعة.",
         "تعمل لوحة المفاتيح أيضًا: الأسهم تحرك المؤشر، وEnter أو المسافة تعمل كضغطة.",
       ]],
       ["الفوز", [
@@ -347,6 +352,7 @@ T.fr = {
   tagline: "Un jeu de la jungle 4×4 à pièces cachées, pour deux joueurs sur le même écran.",
   language: "Langue", restart: "Nouvelle partie", playAgain: "Rejouer",
   confirmRestart: "La partie n’est pas terminée. Commencer une nouvelle partie quand même ?",
+  cancel: "Annuler",
   rulesLink: "📖 Règles du jeu", rulesLinkNew: "📖 Nouveau ? Règles du jeu",
   board: "Plateau", cell: "Ligne {row}, colonne {col} : {what}",
   empty: "vide", hidden: "pièce cachée", shown: "{piece} ({rank})",
@@ -395,7 +401,7 @@ T.fr = {
       ["Étape 2 · Combat (à chaque tour, une seule action)", [
         "**Retourner** n’importe quelle pièce cachée. Elle peut appartenir à l’adversaire.",
         "**Déplacer ou capturer** : touchez une de vos pièces visibles, puis une case en surbrillance. Un point vert déplace vers une case vide ; un cadre rouge capture. Les pièces avancent d’une case vers le haut, le bas, la gauche ou la droite, et ne capturent que des pièces visibles.",
-        "Quand une pièce est sélectionnée, toucher une autre case la désélectionne seulement. Cela ne retourne jamais de pièce.",
+        "Quand une pièce est sélectionnée, toucher une autre de vos pièces visibles la sélectionne à sa place. Toucher toute autre case annule seulement la sélection ; cela ne retourne jamais de pièce.",
         "Le clavier fonctionne aussi : les flèches déplacent le curseur, Entrée ou Espace valent un appui.",
       ]],
       ["Victoire", [
@@ -414,6 +420,7 @@ T.bn = {
   tagline: "4×4 লুকানো ঘুঁটির জঙ্গল দাবা, এক স্ক্রিনে দুজন খেলোয়াড়।",
   language: "ভাষা", restart: "নতুন খেলা", playAgain: "আবার খেলুন",
   confirmRestart: "খেলাটি এখনো শেষ হয়নি। তবুও নতুন খেলা শুরু করবেন?",
+  cancel: "বাতিল",
   rulesLink: "📖 কীভাবে খেলবেন", rulesLinkNew: "📖 নতুন? কীভাবে খেলবেন",
   board: "বোর্ড", cell: "সারি {row}, কলাম {col}: {what}",
   empty: "খালি", hidden: "লুকানো ঘুঁটি", shown: "{piece} ({rank})",
@@ -462,7 +469,7 @@ T.bn = {
       ["ধাপ 2 · লড়াই (প্রতি পালায় একটি কাজ)", [
         "**উল্টান**: যেকোনো লুকানো ঘুঁটি উল্টান। সেটা প্রতিপক্ষেরও হতে পারে।",
         "**চাল দিন বা খান**: নিজের খোলা ঘুঁটিতে চাপুন, তারপর উজ্জ্বল ঘরে। সবুজ বিন্দু মানে খালি ঘরে যাওয়া; লাল ফ্রেম মানে খাওয়া। ঘুঁটি উপরে, নিচে, বাঁয়ে বা ডানে এক ঘর চলে, আর শুধু খোলা ঘুঁটি খেতে পারে।",
-        "ঘুঁটি নির্বাচিত থাকলে অন্য ঘরে চাপলে শুধু নির্বাচন বাতিল হয়, কোনো ঘুঁটি উল্টায় না।",
+        "ঘুঁটি নির্বাচিত থাকলে নিজের আরেকটি খোলা ঘুঁটিতে চাপলে সেটিই নির্বাচিত হয়; অন্য যেকোনো ঘরে চাপলে শুধু নির্বাচন বাতিল হয়, কোনো ঘুঁটি উল্টায় না।",
         "কিবোর্ডেও খেলা যায়: তীর কী দিয়ে কার্সর সরান, Enter বা Space চাপা মানে ট্যাপ।",
       ]],
       ["জয়-পরাজয়", [
@@ -481,6 +488,7 @@ T.pt = {
   tagline: "Xadrez da selva 4×4 com peças ocultas, para dois jogadores na mesma tela.",
   language: "Idioma", restart: "Novo jogo", playAgain: "Jogar de novo",
   confirmRestart: "Este jogo ainda não terminou. Começar um novo mesmo assim?",
+  cancel: "Cancelar",
   rulesLink: "📖 Como jogar", rulesLinkNew: "📖 Primeira vez? Como jogar",
   board: "Tabuleiro", cell: "Linha {row}, coluna {col}: {what}",
   empty: "vazia", hidden: "peça oculta", shown: "{piece} ({rank})",
@@ -529,7 +537,7 @@ T.pt = {
       ["Passo 2 · Batalha (em cada turno, faça uma coisa)", [
         "**Virar** qualquer peça oculta. Ela pode ser do adversário.",
         "**Mover ou capturar**: toque numa peça sua virada para cima e depois numa casa destacada. Um ponto verde move para uma casa vazia; uma borda vermelha captura. As peças andam uma casa para cima, baixo, esquerda ou direita, e só capturam peças viradas para cima.",
-        "Com uma peça selecionada, tocar em outra casa só tira a seleção. Nunca vira uma peça.",
+        "Com uma peça selecionada, tocar noutra peça sua virada para cima seleciona essa no lugar. Tocar em qualquer outra casa só tira a seleção; nunca vira uma peça.",
         "O teclado também funciona: as setas movem o cursor, e Enter ou Espaço equivalem a um toque.",
       ]],
       ["Vitória", [
@@ -548,6 +556,7 @@ T.ru = {
   tagline: "Шахматы джунглей 4×4 со скрытыми фигурами, для двух игроков на одном экране.",
   language: "Язык", restart: "Новая игра", playAgain: "Сыграть ещё",
   confirmRestart: "Партия ещё не закончена. Всё равно начать новую?",
+  cancel: "Отмена",
   rulesLink: "📖 Как играть", rulesLinkNew: "📖 Впервые? Как играть",
   board: "Доска", cell: "Ряд {row}, столбец {col}: {what}",
   empty: "пусто", hidden: "скрытая фигура", shown: "{piece} ({rank})",
@@ -596,7 +605,7 @@ T.ru = {
       ["Шаг 2 · Бой (за ход — одно действие)", [
         "**Открыть** любую скрытую фигуру. Она может оказаться фигурой соперника.",
         "**Ход или взятие**: нажмите свою открытую фигуру, затем подсвеченную клетку. Зелёная точка — ход на пустую клетку, красная рамка — взятие. Фигуры ходят на одну клетку вверх, вниз, влево или вправо и бьют только открытые фигуры.",
-        "Если фигура выбрана, нажатие на другую клетку лишь снимает выбор и никогда не открывает фигуру.",
+        "Если фигура выбрана, нажатие на другую свою открытую фигуру выбирает её. Нажатие на любую другую клетку лишь снимает выбор и никогда не открывает фигуру.",
         "Можно играть с клавиатуры: стрелки двигают курсор, Enter или пробел заменяют нажатие.",
       ]],
       ["Победа", [
@@ -615,6 +624,7 @@ T.id = {
   tagline: "Catur rimba 4×4 dengan bidak tersembunyi, untuk dua pemain di satu layar.",
   language: "Bahasa", restart: "Permainan baru", playAgain: "Main lagi",
   confirmRestart: "Permainan belum selesai. Tetap mulai permainan baru?",
+  cancel: "Batal",
   rulesLink: "📖 Cara bermain", rulesLinkNew: "📖 Baru di sini? Cara bermain",
   board: "Papan", cell: "Baris {row}, kolom {col}: {what}",
   empty: "kosong", hidden: "bidak tertutup", shown: "{piece} ({rank})",
@@ -663,7 +673,7 @@ T.id = {
       ["Langkah 2 · Bertarung (tiap giliran, pilih satu)", [
         "**Buka** bidak tertutup mana saja. Bisa jadi itu milik lawan.",
         "**Jalan atau makan**: ketuk bidak terbukamu, lalu petak yang menyala. Titik hijau berarti pindah ke petak kosong; bingkai merah berarti makan. Bidak bergerak satu petak ke atas, bawah, kiri, atau kanan, dan hanya bisa memakan bidak yang terbuka.",
-        "Saat bidak dipilih, mengetuk petak lain hanya membatalkan pilihan. Tidak pernah membuka bidak.",
+        "Saat bidak dipilih, mengetuk bidak terbukamu yang lain akan memilih bidak itu. Mengetuk petak lain hanya membatalkan pilihan; tidak pernah membuka bidak.",
         "Keyboard juga bisa: tombol panah menggerakkan kursor, Enter atau Spasi berfungsi sebagai ketukan.",
       ]],
       ["Menang", [
@@ -682,6 +692,7 @@ T.ur = {
   tagline: "4×4 چھپے مہروں والی جنگل شطرنج، ایک ہی اسکرین پر دو کھلاڑی۔",
   language: "زبان", restart: "نیا کھیل", playAgain: "دوبارہ کھیلیں",
   confirmRestart: "یہ کھیل ابھی ختم نہیں ہوا۔ پھر بھی نیا کھیل شروع کریں؟",
+  cancel: "منسوخ کریں",
   rulesLink: "📖 کھیلنے کا طریقہ", rulesLinkNew: "📖 نئے ہیں؟ کھیلنے کا طریقہ",
   board: "بورڈ", cell: "قطار {row}، کالم {col}: {what}",
   empty: "خالی", hidden: "چھپا مہرہ", shown: "{piece} ({rank})",
@@ -730,7 +741,7 @@ T.ur = {
       ["مرحلہ 2 · مقابلہ (ہر باری میں ایک کام)", [
         "**پلٹیں**: کوئی بھی چھپا مہرہ پلٹیں۔ وہ مخالف کا بھی نکل سکتا ہے۔",
         "**چلیں یا ماریں**: اپنا کھلا مہرہ چھوئیں، پھر روشن خانہ۔ سبز نقطہ خالی خانے میں جانا ہے؛ سرخ کنارہ مارنا ہے۔ مہرے اوپر، نیچے، بائیں یا دائیں ایک خانہ چلتے ہیں، اور صرف کھلے مہروں کو مار سکتے ہیں۔",
-        "مہرہ منتخب ہو تو کسی اور خانے کو چھونے سے صرف انتخاب ہٹتا ہے، کوئی مہرہ نہیں پلٹتا۔",
+        "مہرہ منتخب ہو تو اپنے کسی دوسرے کھلے مہرے کو چھونے سے وہی منتخب ہو جاتا ہے؛ کسی اور خانے کو چھونے سے صرف انتخاب ہٹتا ہے، کوئی مہرہ نہیں پلٹتا۔",
         "کی بورڈ بھی چلتا ہے: تیر والی کلیدوں سے کرسر ہلائیں، Enter یا Space چھونے کا کام کرتے ہیں۔",
       ]],
       ["جیت ہار", [
@@ -749,6 +760,7 @@ T.de = {
   tagline: "Dschungelschach auf 4×4 mit verdeckten Steinen, für zwei Spieler an einem Bildschirm.",
   language: "Sprache", restart: "Neues Spiel", playAgain: "Nochmal spielen",
   confirmRestart: "Das Spiel ist noch nicht vorbei. Trotzdem ein neues starten?",
+  cancel: "Abbrechen",
   rulesLink: "📖 Spielregeln", rulesLinkNew: "📖 Neu hier? Spielregeln",
   board: "Spielbrett", cell: "Reihe {row}, Spalte {col}: {what}",
   empty: "leer", hidden: "verdeckter Stein", shown: "{piece} ({rank})",
@@ -797,7 +809,7 @@ T.de = {
       ["Schritt 2 · Kampf (pro Zug eine Aktion)", [
         "**Aufdecken**: einen beliebigen verdeckten Stein umdrehen. Er kann dem Gegner gehören.",
         "**Ziehen oder schlagen**: Tippe einen deiner offenen Steine an, dann ein hervorgehobenes Feld. Ein grüner Punkt zieht auf ein leeres Feld, ein roter Rahmen schlägt. Steine ziehen ein Feld nach oben, unten, links oder rechts und schlagen nur offene Steine.",
-        "Ist ein Stein ausgewählt, hebt ein Tipp auf ein anderes Feld nur die Auswahl auf. Er deckt nie einen Stein auf.",
+        "Ist ein Stein ausgewählt, wählt ein Tipp auf einen anderen deiner offenen Steine diesen aus. Ein Tipp auf jedes andere Feld hebt nur die Auswahl auf; er deckt nie einen Stein auf.",
         "Tastatur geht auch: Pfeiltasten bewegen den Cursor, Enter oder Leertaste ersetzen das Tippen.",
       ]],
       ["Gewinnen", [
@@ -816,6 +828,7 @@ T.ja = {
   tagline: "4×4 の伏せ駒式闘獣棋。1 台の画面で 2 人対戦。",
   language: "言語", restart: "新しく始める", playAgain: "もう一度",
   confirmRestart: "まだ対局中です。新しいゲームを始めますか？",
+  cancel: "キャンセル",
   rulesLink: "📖 遊び方", rulesLinkNew: "📖 初めての方は遊び方へ",
   board: "盤面", cell: "{row} 行 {col} 列：{what}",
   empty: "空きマス", hidden: "伏せ駒", shown: "{piece}（{rank}）",
@@ -864,7 +877,7 @@ T.ja = {
       ["ステップ 2 · 対戦（毎ターンどちらか 1 つ）", [
         "**めくる**：好きな伏せ駒を 1 つめくります（相手の駒が出ることもあります）。",
         "**移動・駒取り**：自分の表向きの駒をタップし、光っているマスをタップ。緑の点は空きマスへ移動、赤い枠は相手の駒を取ります。上下左右に 1 マスだけ動け、表向きの駒しか取れません。",
-        "駒を選んだ状態で他のマスをタップすると選択が解除されるだけで、駒はめくられません。",
+        "駒を選んだ状態で自分の別の表向きの駒をタップすると、その駒に選び直します。それ以外のマスをタップしても選択が解除されるだけで、駒はめくられません。",
         "キーボードでも遊べます：矢印キーでカーソル移動、Enter かスペースでタップの代わり。",
       ]],
       ["勝敗", [
@@ -883,6 +896,7 @@ T.pcm = {
   tagline: "4×4 jungle chess wey di pieces hide, for two people for one screen.",
   language: "Language", restart: "New game", playAgain: "Play again",
   confirmRestart: "Dis game never finish. You wan start new one?",
+  cancel: "Cancel",
   rulesLink: "📖 How to play", rulesLinkNew: "📖 You be new? How to play",
   board: "Board", cell: "Line {row}, column {col}: {what}",
   empty: "empty", hidden: "hidden piece", shown: "{piece} ({rank})",
@@ -931,7 +945,7 @@ T.pcm = {
       ["Step 2 · Fight (every turn, do one thing)", [
         "**Open** any hidden piece. E fit be your opponent own.",
         "**Move or chop**: touch one of your open pieces, then touch box wey dey shine. Green dot mean move go empty box; red border mean chop. Pieces dey move one box up, down, left or right, and dem fit chop only open pieces.",
-        "If you don pick piece, to touch another box go only cancel am. E no go ever open piece.",
+        "If you don pick piece, to touch another of your open pieces go pick that one instead. To touch any other box go only cancel am; e no go ever open piece.",
         "Keyboard dey work too: arrow keys dey move di cursor, Enter or Space na like touch.",
       ]],
       ["How to win", [
@@ -950,6 +964,7 @@ T.mr = {
   tagline: "4×4 लपलेल्या सोंगट्यांचे जंगल बुद्धिबळ, एकाच स्क्रीनवर दोन खेळाडू.",
   language: "भाषा", restart: "नवा खेळ", playAgain: "पुन्हा खेळा",
   confirmRestart: "हा खेळ अजून संपलेला नाही. तरीही नवा खेळ सुरू करायचा?",
+  cancel: "रद्द करा",
   rulesLink: "📖 कसे खेळायचे", rulesLinkNew: "📖 नवीन आहात? कसे खेळायचे",
   board: "पट", cell: "ओळ {row}, स्तंभ {col}: {what}",
   empty: "रिकामे", hidden: "लपलेली सोंगटी", shown: "{piece} ({rank})",
@@ -998,7 +1013,7 @@ T.mr = {
       ["टप्पा 2 · लढाई (प्रत्येक पाळीत एक काम)", [
         "**उलटा**: कोणतीही लपलेली सोंगटी उलटा. ती प्रतिस्पर्ध्याची निघू शकते.",
         "**चाल किंवा मार**: तुमची उघडी सोंगटी दाबा, मग उजळलेले घर. हिरवा ठिपका म्हणजे रिकाम्या घरात जाणे; लाल चौकट म्हणजे मारणे. सोंगट्या वर, खाली, डावीकडे किंवा उजवीकडे एक घर चालतात आणि फक्त उघड्या सोंगट्यांना मारू शकतात.",
-        "सोंगटी निवडलेली असताना दुसरे घर दाबल्यास फक्त निवड रद्द होते, कोणतीही सोंगटी उलटत नाही.",
+        "सोंगटी निवडलेली असताना तुमची दुसरी उघडी सोंगटी दाबल्यास तीच निवडली जाते; इतर कोणतेही घर दाबल्यास फक्त निवड रद्द होते, कोणतीही सोंगटी उलटत नाही.",
         "कीबोर्डही चालतो: बाण कळांनी कर्सर हलवा, Enter किंवा Space दाबणे म्हणजे टॅप.",
       ]],
       ["हार-जीत", [
@@ -1017,6 +1032,7 @@ T.te = {
   tagline: "4×4 దాగిన పావుల జంగిల్ చదరంగం, ఒకే తెరపై ఇద్దరు ఆటగాళ్లు.",
   language: "భాష", restart: "కొత్త ఆట", playAgain: "మళ్లీ ఆడండి",
   confirmRestart: "ఈ ఆట ఇంకా ముగియలేదు. అయినా కొత్త ఆట మొదలుపెట్టాలా?",
+  cancel: "రద్దు చేయి",
   rulesLink: "📖 ఎలా ఆడాలి", rulesLinkNew: "📖 కొత్తవారా? ఎలా ఆడాలి",
   board: "బోర్డు", cell: "వరుస {row}, నిలువు వరుస {col}: {what}",
   empty: "ఖాళీ", hidden: "దాగిన పావు", shown: "{piece} ({rank})",
@@ -1065,7 +1081,7 @@ T.te = {
       ["దశ 2 · పోరాటం (ప్రతి వంతులో ఒక పని)", [
         "**తిప్పండి**: ఏదైనా దాగిన పావును తిప్పండి. అది ప్రత్యర్థిదీ కావచ్చు.",
         "**కదలండి లేదా పట్టండి**: మీ తెరిచిన పావును నొక్కి, తర్వాత వెలుగుతున్న గడిని నొక్కండి. ఆకుపచ్చ చుక్క అంటే ఖాళీ గడికి కదలడం; ఎరుపు అంచు అంటే పట్టడం. పావులు పైకి, కిందికి, ఎడమకు లేదా కుడికి ఒక గడి కదులుతాయి, తెరిచిన పావులను మాత్రమే పట్టగలవు.",
-        "పావు ఎంచుకున్నప్పుడు వేరే గడిని నొక్కితే ఎంపిక మాత్రమే రద్దవుతుంది, ఏ పావూ తిరగదు.",
+        "పావు ఎంచుకున్నప్పుడు మీ మరో తెరిచిన పావును నొక్కితే అదే ఎంపికవుతుంది; వేరే ఏ గడిని నొక్కినా ఎంపిక మాత్రమే రద్దవుతుంది, ఏ పావూ తిరగదు.",
         "కీబోర్డ్ కూడా పనిచేస్తుంది: బాణం కీలతో కర్సర్ కదపండి, Enter లేదా Space నొక్కడం ట్యాప్‌తో సమానం.",
       ]],
       ["గెలుపు ఓటమి", [
@@ -1084,6 +1100,7 @@ T.tr = {
   tagline: "Gizli taşlarla 4×4 orman satrancı, tek ekranda iki oyuncu.",
   language: "Dil", restart: "Yeni oyun", playAgain: "Tekrar oyna",
   confirmRestart: "Bu oyun henüz bitmedi. Yine de yeni oyun başlatılsın mı?",
+  cancel: "İptal",
   rulesLink: "📖 Nasıl oynanır", rulesLinkNew: "📖 Yeni misin? Nasıl oynanır",
   board: "Tahta", cell: "Satır {row}, sütun {col}: {what}",
   empty: "boş", hidden: "kapalı taş", shown: "{piece} ({rank})",
@@ -1132,7 +1149,7 @@ T.tr = {
       ["Adım 2 · Savaş (her sırada tek hamle)", [
         "**Çevir**: herhangi bir kapalı taşı aç. Rakibinin taşı da çıkabilir.",
         "**Oynat ya da al**: açık taşlarından birine, sonra parlayan kareye dokun. Yeşil nokta boş kareye gitmek, kırmızı çerçeve almak demektir. Taşlar yukarı, aşağı, sola ya da sağa bir kare gider ve yalnızca açık taşları alabilir.",
-        "Bir taş seçiliyken başka kareye dokunmak yalnızca seçimi kaldırır. Asla taş çevirmez.",
+        "Bir taş seçiliyken başka bir açık taşına dokunursan o seçilir. Başka herhangi bir kareye dokunmak yalnızca seçimi kaldırır; asla taş çevirmez.",
         "Klavye de çalışır: ok tuşları imleci taşır, Enter ya da Boşluk dokunma yerine geçer.",
       ]],
       ["Kazanma", [
@@ -1151,6 +1168,7 @@ T.ha = {
   tagline: "Darar jeji 4×4 mai ɓoyayyun guda, don mutum biyu a allo ɗaya.",
   language: "Harshe", restart: "Sabon wasa", playAgain: "Sake wasa",
   confirmRestart: "Wannan wasan bai ƙare ba tukuna. A fara sabo duk da haka?",
+  cancel: "Soke",
   rulesLink: "📖 Yadda ake wasa", rulesLinkNew: "📖 Sabo ne? Yadda ake wasa",
   board: "Allo", cell: "Layi {row}, ginshiƙi {col}: {what}",
   empty: "fanko", hidden: "ɓoyayyen guda", shown: "{piece} ({rank})",
@@ -1199,7 +1217,7 @@ T.ha = {
       ["Mataki na 2 · Yaƙi (a kowane lokaci, abu ɗaya)", [
         "**Buɗe** kowane ɓoyayyen guda. Zai iya zama na abokin karawa.",
         "**Motsa ko kama**: taɓa ɗaya daga cikin gudanka da ke a buɗe, sannan akwati mai haske. Ɗigon kore yana nufin tafiya zuwa akwati fanko; jan iyaka yana nufin kamawa. Guda yana tafiya akwati ɗaya sama, ƙasa, hagu ko dama, kuma yana kama gudan da ke a buɗe kaɗai.",
-        "Idan an zaɓi guda, taɓa wani akwati yana soke zaɓin kawai. Ba ya taɓa buɗe guda.",
+        "Idan an zaɓi guda, taɓa wani gudanka da ke a buɗe zai zaɓe shi maimakon haka. Taɓa kowane akwati dabam yana soke zaɓin kawai; ba ya taɓa buɗe guda.",
         "Madannai ma yana aiki: maɓallan kibiya suna motsa siginar, Enter ko Space kamar taɓawa ne.",
       ]],
       ["Nasara", [
@@ -1218,6 +1236,7 @@ T.ta = {
   tagline: "4×4 மறைந்த காய்களுடன் காட்டுச் சதுரங்கம், ஒரே திரையில் இருவர்.",
   language: "மொழி", restart: "புதிய ஆட்டம்", playAgain: "மீண்டும் ஆடு",
   confirmRestart: "இந்த ஆட்டம் இன்னும் முடியவில்லை. இருந்தாலும் புதியதைத் தொடங்கவா?",
+  cancel: "ரத்துசெய்",
   rulesLink: "📖 விளையாடும் முறை", rulesLinkNew: "📖 புதியவரா? விளையாடும் முறை",
   board: "பலகை", cell: "வரிசை {row}, நெடுவரிசை {col}: {what}",
   empty: "காலி", hidden: "மறைந்த காய்", shown: "{piece} ({rank})",
@@ -1266,7 +1285,7 @@ T.ta = {
       ["படி 2 · போர் (ஒவ்வொரு முறையும் ஒரு செயல்)", [
         "**திருப்பு**: எந்த மறைந்த காயையும் திருப்புங்கள். அது எதிராளியுடையதாகவும் இருக்கலாம்.",
         "**நகர்த்து அல்லது வெட்டு**: உங்கள் திறந்த காயைத் தொட்டு, பிறகு ஒளிரும் கட்டத்தைத் தொடுங்கள். பச்சைப் புள்ளி காலிக் கட்டத்துக்கு நகர்வு; சிவப்பு ஓரம் வெட்டு. காய்கள் மேல், கீழ், இடம் அல்லது வலம் ஒரு கட்டம் நகரும்; திறந்த காய்களை மட்டுமே வெட்டும்.",
-        "காய் தேர்ந்தெடுக்கப்பட்டிருக்கும்போது வேறு கட்டத்தைத் தொட்டால் தேர்வு மட்டும் நீங்கும்; எந்தக் காயும் திரும்பாது.",
+        "காய் தேர்ந்தெடுக்கப்பட்டிருக்கும்போது உங்கள் மற்றொரு திறந்த காயைத் தொட்டால் அது தேர்வாகும்; வேறு எந்தக் கட்டத்தைத் தொட்டாலும் தேர்வு மட்டும் நீங்கும், எந்தக் காயும் திரும்பாது.",
         "விசைப்பலகையும் வேலை செய்யும்: அம்புக்குறி விசைகள் சுட்டியை நகர்த்தும், Enter அல்லது Space தொடுவதற்குச் சமம்.",
       ]],
       ["வெற்றி தோல்வி", [
@@ -1285,6 +1304,7 @@ T.sw = {
   tagline: "Sataranji ya msituni ya 4×4 yenye vipande vilivyofichwa, kwa wachezaji wawili kwenye skrini moja.",
   language: "Lugha", restart: "Mchezo mpya", playAgain: "Cheza tena",
   confirmRestart: "Mchezo huu bado haujaisha. Uanze mpya hata hivyo?",
+  cancel: "Ghairi",
   rulesLink: "📖 Jinsi ya kucheza", rulesLinkNew: "📖 Mgeni? Jinsi ya kucheza",
   board: "Ubao", cell: "Mstari {row}, safu {col}: {what}",
   empty: "tupu", hidden: "kipande kilichofichwa", shown: "{piece} ({rank})",
@@ -1333,7 +1353,7 @@ T.sw = {
       ["Hatua ya 2 · Vita (kila zamu, fanya jambo moja)", [
         "**Fungua** kipande chochote kilichofichwa. Huenda kikawa cha mpinzani wako.",
         "**Sogeza au kula**: gusa kipande chako kilicho wazi, kisha kisanduku kinachong’aa. Nukta ya kijani ni kuhamia kisanduku tupu; mpaka mwekundu ni kula. Vipande husogea kisanduku kimoja juu, chini, kushoto au kulia, na hula vipande vilivyo wazi tu.",
-        "Kipande kikiwa kimechaguliwa, kugusa kisanduku kingine huondoa uchaguzi tu. Kamwe hakifungui kipande.",
+        "Kipande kikiwa kimechaguliwa, kugusa kipande chako kingine kilicho wazi hukichagua badala yake. Kugusa kisanduku kingine chochote huondoa uchaguzi tu; kamwe hakifungui kipande.",
         "Kibodi pia inafanya kazi: vitufe vya mishale husogeza kiashiria, Enter au Space ni sawa na kugusa.",
       ]],
       ["Kushinda", [
@@ -1352,6 +1372,7 @@ T["zh-Hant"] = {
   tagline: "4×4 翻棋版鬥獸棋，雙人同螢幕對戰。",
   language: "語言", restart: "重新開局", playAgain: "再來一局",
   confirmRestart: "目前對局還沒結束，確定要重新開局嗎？",
+  cancel: "取消",
   rulesLink: "📖 玩法說明", rulesLinkNew: "📖 新手？先看玩法說明",
   board: "棋盤", cell: "第 {row} 列第 {col} 行：{what}",
   empty: "空格", hidden: "暗子", shown: "{piece}（{rank}）",
@@ -1400,7 +1421,7 @@ T["zh-Hant"] = {
       ["第二步 · 對戰（每回合二選一）", [
         "**翻子**：翻開任意一個暗子（翻出來的可能是對方的棋子）。",
         "**移動/吃子**：先點己方明子，再點高亮格子——綠點是移動到空格，紅框是吃掉對方棋子。每次只能上下左右走一格，只能吃已翻開的棋子。",
-        "選取棋子後點其他格子只會取消選取，不會翻子。",
+        "選取棋子後，點己方另一個明子會改選它；點其他格子只會取消選取，不會翻子。",
         "也可以用鍵盤：方向鍵移動游標，Enter 或空白鍵代替點擊。",
       ]],
       ["勝負", [
@@ -1419,6 +1440,7 @@ T.vi = {
   tagline: "Cờ thú 4×4 với quân úp, cho hai người chơi trên cùng một màn hình.",
   language: "Ngôn ngữ", restart: "Ván mới", playAgain: "Chơi lại",
   confirmRestart: "Ván này chưa kết thúc. Vẫn bắt đầu ván mới?",
+  cancel: "Hủy",
   rulesLink: "📖 Cách chơi", rulesLinkNew: "📖 Mới chơi? Xem cách chơi",
   board: "Bàn cờ", cell: "Hàng {row}, cột {col}: {what}",
   empty: "ô trống", hidden: "quân úp", shown: "{piece} ({rank})",
@@ -1467,7 +1489,7 @@ T.vi = {
       ["Bước 2 · Giao chiến (mỗi lượt làm một việc)", [
         "**Lật** bất kỳ quân úp nào. Có thể đó là quân của đối thủ.",
         "**Đi hoặc ăn**: chạm vào một quân ngửa của bạn, rồi chạm ô được tô sáng. Chấm xanh là đi đến ô trống; viền đỏ là ăn quân. Quân đi một ô lên, xuống, trái hoặc phải, và chỉ ăn được quân đã ngửa.",
-        "Khi đang chọn một quân, chạm vào ô khác chỉ bỏ chọn. Không bao giờ lật quân.",
+        "Khi đang chọn một quân, chạm vào một quân ngửa khác của bạn sẽ chọn quân đó. Chạm vào ô khác chỉ bỏ chọn; không bao giờ lật quân.",
         "Bàn phím cũng dùng được: phím mũi tên di chuyển con trỏ, Enter hoặc phím cách thay cho chạm.",
       ]],
       ["Thắng thua", [
@@ -1486,6 +1508,7 @@ T.fil = {
   tagline: "4×4 na ahedres ng gubat na may nakatagong piyesa, para sa dalawang manlalaro sa iisang screen.",
   language: "Wika", restart: "Bagong laro", playAgain: "Maglaro ulit",
   confirmRestart: "Hindi pa tapos ang larong ito. Magsimula pa rin ng bago?",
+  cancel: "Kanselahin",
   rulesLink: "📖 Paano maglaro", rulesLinkNew: "📖 Bago ka? Paano maglaro",
   board: "Board", cell: "Hanay {row}, kolum {col}: {what}",
   empty: "bakante", hidden: "nakatagong piyesa", shown: "{piece} ({rank})",
@@ -1534,7 +1557,7 @@ T.fil = {
       ["Hakbang 2 · Laban (bawat turno, isang gawain)", [
         "**Magbaligtad** ng kahit anong nakatagong piyesa. Maaaring sa kalaban pala ito.",
         "**Gumalaw o kumain**: pindutin ang isa sa iyong nakabukas na piyesa, saka ang kahong umiilaw. Ang berdeng tuldok ay paglipat sa bakanteng kahon; ang pulang gilid ay pagkain. Isang kahon ang galaw pataas, pababa, pakaliwa o pakanan, at nakabukas na piyesa lang ang puwedeng kainin.",
-        "Kapag may napiling piyesa, ang pagpindot sa ibang kahon ay nag-aalis lang ng pagpili. Hindi ito kailanman nagbabaligtad ng piyesa.",
+        "Kapag may napiling piyesa, ang pagpindot sa isa pa sa iyong nakabukas na piyesa ay pipili rito. Ang pagpindot sa ibang kahon ay nag-aalis lang ng pagpili; hindi ito kailanman nagbabaligtad ng piyesa.",
         "Gumagana rin ang keyboard: inililipat ng mga arrow key ang cursor, at ang Enter o Space ay parang pagpindot.",
       ]],
       ["Pagpanalo", [
@@ -1553,6 +1576,7 @@ T.ko = {
   tagline: "4×4 뒤집기 정글 체스, 한 화면에서 둘이 대결.",
   language: "언어", restart: "새 게임", playAgain: "다시 하기",
   confirmRestart: "아직 게임이 끝나지 않았습니다. 새 게임을 시작할까요?",
+  cancel: "취소",
   rulesLink: "📖 게임 방법", rulesLinkNew: "📖 처음이세요? 게임 방법 보기",
   board: "보드", cell: "{row}행 {col}열: {what}",
   empty: "빈칸", hidden: "숨은 말", shown: "{piece} ({rank})",
@@ -1601,7 +1625,7 @@ T.ko = {
       ["2단계 · 대결 (매 턴 하나 선택)", [
         "**뒤집기**: 아무 숨은 말이나 하나 뒤집습니다(상대 말이 나올 수도 있습니다).",
         "**이동/잡기**: 내 앞면 말을 누른 뒤 강조된 칸을 누릅니다. 초록 점은 빈칸으로 이동, 빨간 테두리는 상대 말 잡기입니다. 상하좌우로 한 칸만 움직이며 앞면인 말만 잡을 수 있습니다.",
-        "말을 선택한 상태에서 다른 칸을 누르면 선택만 해제되고 말은 뒤집히지 않습니다.",
+        "말을 선택한 상태에서 내 다른 앞면 말을 누르면 그 말로 선택이 바뀝니다. 다른 칸을 누르면 선택만 해제되고 말은 뒤집히지 않습니다.",
         "키보드도 됩니다: 방향키로 커서 이동, Enter나 Space가 누르기 역할을 합니다.",
       ]],
       ["승패", [
@@ -1620,6 +1644,7 @@ T.fa = {
   tagline: "شطرنج جنگل 4×4 با مهره‌های پنهان، برای دو بازیکن روی یک صفحه.",
   language: "زبان", restart: "بازی جدید", playAgain: "دوباره بازی کن",
   confirmRestart: "این بازی هنوز تمام نشده. با این حال بازی جدید شروع شود؟",
+  cancel: "لغو",
   rulesLink: "📖 روش بازی", rulesLinkNew: "📖 تازه‌واردی؟ روش بازی",
   board: "صفحه", cell: "ردیف {row}، ستون {col}: {what}",
   empty: "خالی", hidden: "مهرهٔ پنهان", shown: "{piece} ({rank})",
@@ -1668,7 +1693,7 @@ T.fa = {
       ["مرحلهٔ 2 · نبرد (در هر نوبت یک کار)", [
         "**برگرداندن**: هر مهرهٔ پنهانی را رو کن. ممکن است مال حریف باشد.",
         "**حرکت یا زدن**: روی یکی از مهره‌های روشدهٔ خودت بزن، سپس روی خانهٔ روشن. نقطهٔ سبز یعنی رفتن به خانهٔ خالی؛ قاب قرمز یعنی زدن. مهره‌ها یک خانه به بالا، پایین، چپ یا راست می‌روند و فقط مهره‌های روشده را می‌زنند.",
-        "وقتی مهره‌ای انتخاب شده، زدن روی خانهٔ دیگر فقط انتخاب را لغو می‌کند و هرگز مهره‌ای را برنمی‌گرداند.",
+        "وقتی مهره‌ای انتخاب شده، زدن روی مهرهٔ روشدهٔ دیگری از خودت آن را انتخاب می‌کند. زدن روی هر خانهٔ دیگر فقط انتخاب را لغو می‌کند و هرگز مهره‌ای را برنمی‌گرداند.",
         "صفحه‌کلید هم کار می‌کند: کلیدهای جهت‌نما مکان‌نما را جابه‌جا می‌کنند و Enter یا Space مثل لمس است.",
       ]],
       ["برد و باخت", [
@@ -1687,6 +1712,7 @@ T.jv = {
   tagline: "Catur alas 4×4 kanthi bidak sing didhelikake, kanggo wong loro ing layar siji.",
   language: "Basa", restart: "Dolanan anyar", playAgain: "Dolanan maneh",
   confirmRestart: "Dolanan iki durung rampung. Tetep miwiti sing anyar?",
+  cancel: "Batal",
   rulesLink: "📖 Cara dolanan", rulesLinkNew: "📖 Lagi anyar? Cara dolanan",
   board: "Papan", cell: "Baris {row}, kolom {col}: {what}",
   empty: "kosong", hidden: "bidak kadhelikake", shown: "{piece} ({rank})",
@@ -1735,7 +1761,7 @@ T.jv = {
       ["Langkah 2 · Perang (saben giliran, siji tumindak)", [
         "**Walik** bidak kadhelikake endi wae. Bisa uga duweke mungsuh.",
         "**Obah utawa mangan**: tutul siji bidakmu sing kebukak, banjur kothak sing sumunar. Titik ijo tegese pindhah menyang kothak kosong; pinggiran abang tegese mangan. Bidak obah siji kothak munggah, mudhun, ngiwa utawa nengen, lan mung bisa mangan bidak sing kebukak.",
-        "Yen ana bidak sing dipilih, nutul kothak liya mung mbatalake pilihan. Ora tau malik bidak.",
+        "Yen ana bidak sing dipilih, nutul bidakmu liyane sing kebukak bakal milih bidak kuwi. Nutul kothak liya mung mbatalake pilihan; ora tau malik bidak.",
         "Keyboard uga bisa: tombol panah ngobahake kursor, Enter utawa Space padha karo nutul.",
       ]],
       ["Menang", [
@@ -1754,6 +1780,7 @@ T.it = {
   tagline: "Scacchi della giungla 4×4 con pezzi coperti, per due giocatori sullo stesso schermo.",
   language: "Lingua", restart: "Nuova partita", playAgain: "Gioca ancora",
   confirmRestart: "La partita non è finita. Iniziarne comunque una nuova?",
+  cancel: "Annulla",
   rulesLink: "📖 Come si gioca", rulesLinkNew: "📖 Prima volta? Come si gioca",
   board: "Scacchiera", cell: "Riga {row}, colonna {col}: {what}",
   empty: "vuota", hidden: "pezzo coperto", shown: "{piece} ({rank})",
@@ -1802,7 +1829,7 @@ T.it = {
       ["Fase 2 · Battaglia (a ogni turno, una sola azione)", [
         "**Scopri** un qualsiasi pezzo coperto. Potrebbe essere dell’avversario.",
         "**Muovi o cattura**: tocca un tuo pezzo scoperto, poi una casella evidenziata. Il punto verde indica uno spostamento su casella vuota; il bordo rosso una cattura. I pezzi si muovono di una casella in alto, in basso, a sinistra o a destra e catturano solo pezzi scoperti.",
-        "Con un pezzo selezionato, toccare un’altra casella annulla solo la selezione. Non scopre mai un pezzo.",
+        "Con un pezzo selezionato, toccare un altro tuo pezzo scoperto seleziona quello. Toccare qualsiasi altra casella annulla solo la selezione; non scopre mai un pezzo.",
         "Funziona anche la tastiera: le frecce spostano il cursore, Invio o Spazio valgono come un tocco.",
       ]],
       ["Vittoria", [
@@ -1821,6 +1848,7 @@ T.pa = {
   tagline: "4×4 ਲੁਕੇ ਮੋਹਰਿਆਂ ਵਾਲੀ ਜੰਗਲ ਸ਼ਤਰੰਜ, ਇੱਕ ਸਕਰੀਨ ’ਤੇ ਦੋ ਖਿਡਾਰੀ।",
   language: "ਭਾਸ਼ਾ", restart: "ਨਵੀਂ ਖੇਡ", playAgain: "ਫਿਰ ਖੇਡੋ",
   confirmRestart: "ਇਹ ਖੇਡ ਅਜੇ ਮੁੱਕੀ ਨਹੀਂ। ਫਿਰ ਵੀ ਨਵੀਂ ਖੇਡ ਸ਼ੁਰੂ ਕਰਨੀ ਹੈ?",
+  cancel: "ਰੱਦ ਕਰੋ",
   rulesLink: "📖 ਕਿਵੇਂ ਖੇਡਣਾ ਹੈ", rulesLinkNew: "📖 ਨਵੇਂ ਹੋ? ਕਿਵੇਂ ਖੇਡਣਾ ਹੈ",
   board: "ਬੋਰਡ", cell: "ਕਤਾਰ {row}, ਕਾਲਮ {col}: {what}",
   empty: "ਖਾਲੀ", hidden: "ਲੁਕਿਆ ਮੋਹਰਾ", shown: "{piece} ({rank})",
@@ -1869,7 +1897,7 @@ T.pa = {
       ["ਕਦਮ 2 · ਲੜਾਈ (ਹਰ ਵਾਰੀ ਇੱਕ ਕੰਮ)", [
         "**ਪਲਟੋ**: ਕੋਈ ਵੀ ਲੁਕਿਆ ਮੋਹਰਾ ਪਲਟੋ। ਉਹ ਵਿਰੋਧੀ ਦਾ ਵੀ ਨਿਕਲ ਸਕਦਾ ਹੈ।",
         "**ਚੱਲੋ ਜਾਂ ਮਾਰੋ**: ਆਪਣਾ ਖੁੱਲ੍ਹਾ ਮੋਹਰਾ ਦਬਾਓ, ਫਿਰ ਚਮਕਦਾ ਖਾਨਾ। ਹਰਾ ਬਿੰਦੂ ਮਤਲਬ ਖਾਲੀ ਖਾਨੇ ਵਿੱਚ ਜਾਣਾ; ਲਾਲ ਕਿਨਾਰਾ ਮਤਲਬ ਮਾਰਨਾ। ਮੋਹਰੇ ਉੱਪਰ, ਹੇਠਾਂ, ਖੱਬੇ ਜਾਂ ਸੱਜੇ ਇੱਕ ਖਾਨਾ ਚੱਲਦੇ ਹਨ ਅਤੇ ਸਿਰਫ਼ ਖੁੱਲ੍ਹੇ ਮੋਹਰਿਆਂ ਨੂੰ ਮਾਰਦੇ ਹਨ।",
-        "ਮੋਹਰਾ ਚੁਣਿਆ ਹੋਵੇ ਤਾਂ ਹੋਰ ਖਾਨਾ ਦਬਾਉਣ ਨਾਲ ਸਿਰਫ਼ ਚੋਣ ਰੱਦ ਹੁੰਦੀ ਹੈ, ਕੋਈ ਮੋਹਰਾ ਕਦੇ ਨਹੀਂ ਪਲਟਦਾ।",
+        "ਮੋਹਰਾ ਚੁਣਿਆ ਹੋਵੇ ਤਾਂ ਆਪਣੇ ਕਿਸੇ ਹੋਰ ਖੁੱਲ੍ਹੇ ਮੋਹਰੇ ਨੂੰ ਦਬਾਉਣ ਨਾਲ ਉਹੀ ਚੁਣਿਆ ਜਾਂਦਾ ਹੈ; ਕੋਈ ਹੋਰ ਖਾਨਾ ਦਬਾਉਣ ਨਾਲ ਸਿਰਫ਼ ਚੋਣ ਰੱਦ ਹੁੰਦੀ ਹੈ, ਕੋਈ ਮੋਹਰਾ ਕਦੇ ਨਹੀਂ ਪਲਟਦਾ।",
         "ਕੀਬੋਰਡ ਵੀ ਚੱਲਦਾ ਹੈ: ਤੀਰ ਵਾਲੀਆਂ ਕੁੰਜੀਆਂ ਕਰਸਰ ਹਿਲਾਉਂਦੀਆਂ ਹਨ, Enter ਜਾਂ Space ਦਬਾਉਣਾ ਟੈਪ ਵਰਗਾ ਹੈ।",
       ]],
       ["ਜਿੱਤ-ਹਾਰ", [
@@ -1888,6 +1916,7 @@ T.th = {
   tagline: "หมากรุกป่า 4×4 แบบหมากคว่ำ เล่นสองคนบนหน้าจอเดียว",
   language: "ภาษา", restart: "เกมใหม่", playAgain: "เล่นอีกครั้ง",
   confirmRestart: "เกมนี้ยังไม่จบ จะเริ่มเกมใหม่เลยไหม?",
+  cancel: "ยกเลิก",
   rulesLink: "📖 วิธีเล่น", rulesLinkNew: "📖 มือใหม่? ดูวิธีเล่น",
   board: "กระดาน", cell: "แถว {row} คอลัมน์ {col}: {what}",
   empty: "ว่าง", hidden: "หมากคว่ำ", shown: "{piece} ({rank})",
@@ -1936,7 +1965,7 @@ T.th = {
       ["ขั้นที่ 2 · ต่อสู้ (ทุกตาทำอย่างใดอย่างหนึ่ง)", [
         "**พลิก**หมากคว่ำตัวใดก็ได้ อาจเป็นหมากของคู่แข่งก็ได้",
         "**เดินหรือกิน**: แตะหมากหงายของคุณ แล้วแตะช่องที่สว่าง จุดเขียวคือเดินไปช่องว่าง กรอบแดงคือกิน หมากเดินขึ้น ลง ซ้าย หรือขวาได้หนึ่งช่อง และกินได้เฉพาะหมากที่หงายแล้ว",
-        "เมื่อเลือกหมากอยู่ การแตะช่องอื่นจะยกเลิกการเลือกเท่านั้น ไม่พลิกหมากเด็ดขาด",
+        "เมื่อเลือกหมากอยู่ การแตะหมากหงายอีกตัวของคุณจะเปลี่ยนไปเลือกตัวนั้น การแตะช่องอื่นจะยกเลิกการเลือกเท่านั้น ไม่พลิกหมากเด็ดขาด",
         "ใช้แป้นพิมพ์ได้: ปุ่มลูกศรเลื่อนเคอร์เซอร์ Enter หรือ Space ใช้แทนการแตะ",
       ]],
       ["แพ้ชนะ", [
@@ -1955,6 +1984,7 @@ T.gu = {
   tagline: "4×4 છુપાયેલાં મહોરાંવાળી જંગલ શતરંજ, એક જ સ્ક્રીન પર બે ખેલાડી.",
   language: "ભાષા", restart: "નવી રમત", playAgain: "ફરી રમો",
   confirmRestart: "આ રમત હજી પૂરી નથી થઈ. છતાં નવી રમત શરૂ કરવી છે?",
+  cancel: "રદ કરો",
   rulesLink: "📖 કેવી રીતે રમવું", rulesLinkNew: "📖 નવા છો? કેવી રીતે રમવું",
   board: "બોર્ડ", cell: "હરોળ {row}, સ્તંભ {col}: {what}",
   empty: "ખાલી", hidden: "છુપાયેલું મહોરું", shown: "{piece} ({rank})",
@@ -2003,7 +2033,7 @@ T.gu = {
       ["પગલું 2 · લડાઈ (દરેક વારે એક કામ)", [
         "**ઉલટાવો**: કોઈ પણ છુપાયેલું મહોરું ઉલટાવો. તે હરીફનું પણ નીકળી શકે.",
         "**ચાલો અથવા મારો**: તમારું ખુલ્લું મહોરું દબાવો, પછી ચમકતું ખાનું. લીલું ટપકું એટલે ખાલી ખાનામાં જવું; લાલ કિનારી એટલે મારવું. મહોરાં ઉપર, નીચે, ડાબે કે જમણે એક ખાનું ચાલે છે અને ફક્ત ખુલ્લાં મહોરાંને મારે છે.",
-        "મહોરું પસંદ હોય ત્યારે બીજું ખાનું દબાવવાથી ફક્ત પસંદગી રદ થાય છે, કોઈ મહોરું ક્યારેય ઉલટાતું નથી.",
+        "મહોરું પસંદ હોય ત્યારે તમારું બીજું ખુલ્લું મહોરું દબાવવાથી તે પસંદ થાય છે; બીજું કોઈ ખાનું દબાવવાથી ફક્ત પસંદગી રદ થાય છે, કોઈ મહોરું ક્યારેય ઉલટાતું નથી.",
         "કીબોર્ડ પણ ચાલે છે: તીર કી કર્સર ખસેડે છે, Enter કે Space દબાવવું એટલે ટૅપ.",
       ]],
       ["હાર-જીત", [
@@ -2022,7 +2052,9 @@ const RTL = new Set(["ar", "ur", "fa"]);
 const CJK = new Set(["zh", "zh-Hant", "ja"]);   // no spaces between sentences; short animal names fit the casualty trays
 const LANG_KEY = "dark-jungle-chess-lang";
 
-const has = code => typeof code === "string" && Object.hasOwn(T, code);
+// Safari < 15.4 lacks the static hasOwn on Object; calling it would blank every page.
+const own = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
+const has = code => typeof code === "string" && own(T, code);
 
 // Stored choice wins, then the first browser language we have, then Chinese.
 function pickLang(stored, prefs) {
@@ -2048,7 +2080,7 @@ function saveLang(code) {
 }
 
 const fmt = (template, vars) =>
-  template.replace(/\{(\w+)\}/g, (m, k) => (Object.hasOwn(vars, k) ? String(vars[k]) : m));
+  template.replace(/\{(\w+)\}/g, (m, k) => (own(vars, k) ? String(vars[k]) : m));
 
 function applyLang(code) {
   document.documentElement.lang = T[code].htmlLang;
@@ -2078,7 +2110,7 @@ function mountLangPicker(root, onChange) {
 }
 
 return Object.freeze({
-  T, RTL, pickLang, loadLang, saveLang, fmt, applyLang, mountLangPicker,
+  T, RTL, own, pickLang, loadLang, saveLang, fmt, applyLang, mountLangPicker,
   isCjk: code => CJK.has(code),
 });
 })();
