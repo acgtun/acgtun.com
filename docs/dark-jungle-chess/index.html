@@ -6,7 +6,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-DuiJ39po0HVW/wpntlAKU00UpdklsQPUtTjdldWlCk0='; style-src 'sha256-dZsB/mhXgF1ACkfz7vB9zjvdqc3v8nyg/Nhszg/xfvg='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-gIpOoNbmo7aT5joAR68oF7B0PcwA3lTEHodUEn9DaGw='; style-src 'sha256-VD8vsETTuBvPjlclOsE2GhRR04FBc+YD1pTguVTinAY='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>暗棋斗兽棋</title>
 <meta name="description" content="暗棋斗兽棋 · Dark Jungle Chess：4×4 翻棋版斗兽棋，双人同屏对战，支持 30 种语言。A 4×4 hidden-piece Jungle chess for two players on one screen, in 30 languages.">
@@ -51,6 +51,8 @@ html:lang(ja) body { font-family: "Hiragino Sans", "Yu Gothic", Meiryo, sans-ser
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
+  position: relative;
+  z-index: 11;   /* above the game-over overlay so the language can still change */
 }
 .rules-link {
   white-space: nowrap;
@@ -274,7 +276,7 @@ body.cjk .tray h3 { letter-spacing: 2px; }
 body.cjk #restart { letter-spacing: 2px; }
 #restart:hover { border-color: var(--accent); color: var(--accent); }
 #overlay {
-  position: fixed; inset: 0;
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0;
   background: rgba(10,11,15,.78);
   display: none;
   align-items: center;
@@ -307,7 +309,25 @@ body.cjk .overlay-box h2 { letter-spacing: 4px; }
   font-weight: 700;
 }
 body.cjk .overlay-box button { letter-spacing: 3px; }
+#confirm {
+  margin: auto;
+  max-width: min(92vw, 420px);
+  padding: 28px 32px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  text-align: center;
+}
+#confirm::backdrop { background: rgba(10,11,15,.78); }
+#confirm p { font-size: 15px; margin-bottom: 20px; }
+.confirm-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.confirm-actions button { padding: 8px 22px; font: inherit; font-size: 14px; border-radius: 8px; cursor: pointer; }
+#confirm-cancel { color: var(--text); background: transparent; border: 1px solid var(--line); }
+#confirm-ok { color: #1b1405; background: var(--accent); border: none; font-weight: 700; }
 #app { display: flex; flex-direction: column; align-items: center; }
+#table { display: contents; }
 @media (max-width: 720px) {
   main { flex-direction: column; align-items: center; }
   .tray { width: min(92vw, 480px); }
@@ -320,6 +340,7 @@ body.cjk .overlay-box button { letter-spacing: 3px; }
   <a class="rules-link" id="rules-link" href="rules.html"></a>
   <div id="lang-picker"></div>
 </nav>
+<div id="table">
 <header>
   <h1 id="title">暗棋斗兽棋</h1>
   <div id="players">
@@ -341,14 +362,22 @@ body.cjk .overlay-box button { letter-spacing: 3px; }
 </main>
 <button id="restart"></button>
 </div>
+</div>
 <div id="overlay">
-  <div class="overlay-box" role="dialog" aria-modal="true" aria-labelledby="overlay-title" aria-describedby="overlay-reason">
+  <div class="overlay-box" role="dialog" aria-labelledby="overlay-title" aria-describedby="overlay-reason">
     <h2 id="overlay-title"></h2>
     <p id="overlay-reason"></p>
     <button id="overlay-restart"></button>
   </div>
 </div>
-<script src="i18n.js?v=d959892388"></script>
+<dialog id="confirm" aria-labelledby="confirm-text">
+  <p id="confirm-text"></p>
+  <div class="confirm-actions">
+    <button id="confirm-cancel"></button>
+    <button id="confirm-ok"></button>
+  </div>
+</dialog>
+<script src="i18n.js?v=a2e9667e6c"></script>
 <script>
 'use strict';
 
@@ -447,9 +476,9 @@ const PARAM_CHECKS = {
   c1: c => COLORS.includes(c), c2: c => COLORS.includes(c),
   round: v => isInt(v, 1, 99), n: v => v === 1 || v === 2, limit: v => v === IDLE_DRAW_LIMIT,
 };
-const isMsgPart = x => !!x && typeof x === 'object' && Object.hasOwn(I18N.en.msg, x.k) &&
+const isMsgPart = x => !!x && typeof x === 'object' && DJC.own(I18N.en.msg, x.k) &&
   (x.p === undefined || (typeof x.p === 'object' && x.p !== null &&
-    Object.entries(x.p).every(([key, v]) => Object.hasOwn(PARAM_CHECKS, key) && PARAM_CHECKS[key](v))));
+    Object.entries(x.p).every(([key, v]) => DJC.own(PARAM_CHECKS, key) && PARAM_CHECKS[key](v))));
 const isParts = a => Array.isArray(a) && a.length <= 8 && a.every(isMsgPart);
 
 function isValidSave(s) {
@@ -694,6 +723,9 @@ function renderStatic() {
   document.getElementById('title').textContent = L().title;
   document.getElementById('restart').textContent = L().restart;
   document.getElementById('overlay-restart').textContent = L().playAgain;
+  document.getElementById('confirm-text').textContent = L().confirmRestart;
+  document.getElementById('confirm-ok').textContent = L().restart;
+  document.getElementById('confirm-cancel').textContent = L().cancel;
   document.getElementById('tray-red-title').textContent = L().trayRed;
   document.getElementById('tray-black-title').textContent = L().trayBlack;
   updateLangPicker(lang);
@@ -774,8 +806,8 @@ function renderTrays() {
 
 function renderOverlay() {
   const overlay = document.getElementById('overlay');
-  // 结算对话框打开时，背后的页面不可聚焦、不可点
-  document.getElementById('app').inert = state.phase === 'over';
+  // 结算对话框打开时，背后的棋局不可聚焦、不可点；顶栏（规则链接、语言）仍可用
+  document.getElementById('table').inert = state.phase === 'over';
   if (state.phase !== 'over') { overlay.classList.remove('show'); return; }
   document.getElementById('overlay-title').textContent =
     fmtMsg([state.winner === null ? { k: 'draw' } : { k: 'win', p: { player: state.winner } }]);
@@ -813,10 +845,16 @@ if (typeof document !== 'undefined') {
       next.focus();
     }
   });
+  // 页内确认框：部分 App 内置浏览器会屏蔽 window.confirm（直接返回 false），重新开局就永远点不动
+  const confirmDlg = document.getElementById('confirm');
   document.getElementById('restart').addEventListener('click', () => {
     const inProgress = state.phase !== 'over' && state.board.some(p => !p || p.revealed);
-    if (!inProgress || window.confirm(L().confirmRestart)) newGame();
+    if (!inProgress) newGame();
+    else if (typeof confirmDlg.showModal === 'function') confirmDlg.showModal();
+    else if (window.confirm(L().confirmRestart)) newGame();
   });
+  document.getElementById('confirm-ok').addEventListener('click', () => { confirmDlg.close(); newGame(); });
+  document.getElementById('confirm-cancel').addEventListener('click', () => confirmDlg.close());
   document.getElementById('overlay-restart').addEventListener('click', () => {
     newGame();
     boardEl.children[0].focus();

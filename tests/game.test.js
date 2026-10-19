@@ -216,6 +216,22 @@ const tests = {
     }
   },
 
+  'no Object.hasOwn (it throws on Safari < 15.4 and leaves a blank page)'() {
+    for (const file of [...PAGES, I18N_FILE]) assert.ok(!/Object\.hasOwn\b/.test(fs.readFileSync(file, 'utf8')), path.basename(file));
+  },
+
+  'every page re-reads the language when Back restores it from the bfcache'() {
+    for (const file of PAGES) {
+      const src = fs.readFileSync(file, 'utf8');
+      if (/<script src=/.test(src)) assert.ok(/addEventListener\('pageshow'/.test(src), path.relative(process.cwd(), file));
+    }
+  },
+
+  'restart asks in-page, not with window.confirm (some in-app browsers block it)'() {
+    assert.ok(/<dialog id="confirm"/.test(html), 'missing confirm dialog');
+    assert.ok(/confirmDlg\.showModal\(\)/.test(html), 'restart does not open the dialog');
+  },
+
   'CSP hashes and script versions are current (fix: node tools/csp.js)'() {
     for (const file of PAGES) {
       const src = fs.readFileSync(file, 'utf8');
@@ -265,7 +281,8 @@ const tests = {
       const s = playState(b, { captured: { red: [P(7, 'red')], black: [P(8, 'black')] }, selected: 0 });
       game.setLang(code);
       const texts = [document.title, els.status.textContent, els['label-p1'].textContent, els['label-p2'].textContent,
-        els.restart.textContent, els['rules-link'].textContent, ...els.board.children.map(c => c.attrs['aria-label'] + textOf(c)),
+        els.restart.textContent, els['rules-link'].textContent, els['confirm-text'].textContent,
+        els['confirm-ok'].textContent, els['confirm-cancel'].textContent, ...els.board.children.map(c => c.attrs['aria-label'] + textOf(c)),
         textOf(els['tray-red']), textOf(els['tray-black'])];
       for (const k of Object.keys(DJC.T.en.msg)) texts.push(game.fmtMsg([{ k, p: sample }]));
       s.players.p1 = null;
