@@ -5,7 +5,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-srbHJjk978plDmXt7EZfYW8lOBAzmrJpgTbmOpmEu/c='; style-src 'sha256-2MzmPmThfI8k84Re45JKwxrQmjZ/LEXoO/pI2e6aRBU='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-AZhHnS01cMgoK4tSiEEl5PGKIRACp1Xivc0c7oCLm0Q='; style-src 'sha256-dOlZG/L+LbOqZb4uk63m1Cst6Fd35pMh+wWCf3jzQRs='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>玩法说明 · 暗棋斗兽棋</title>
 <meta name="description" content="暗棋斗兽棋 · Dark Jungle Chess 玩法说明：棋子等级、吃子规则、定色、对战与胜负。How to play Dark Jungle Chess.">
@@ -39,12 +39,14 @@ html:lang(ja) body { font-family: "Hiragino Sans", "Yu Gothic", Meiryo, sans-ser
 .topbar {
   width: min(92vw, 640px);
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
   margin-bottom: 18px;
 }
 .back-link {
+  white-space: nowrap;
   padding: 5px 14px;
   font-size: 12px;
   color: #1b1405;
@@ -53,18 +55,29 @@ html:lang(ja) body { font-family: "Hiragino Sans", "Yu Gothic", Meiryo, sans-ser
   text-decoration: none;
   font-weight: 700;
 }
-#lang-select {
-  padding: 5px 10px;
-  font: inherit;
+#lang-picker {
+  display: flex;
+  align-items: center;
+  margin-inline-start: auto;
+  padding-inline-start: 10px;
   font-size: 12px;
-  color: var(--text);
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 999px;
+}
+#lang-picker:hover { border-color: var(--accent); }
+#lang-picker:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+#lang-picker select {
+  max-width: 12em;
+  padding: 5px 10px 5px 6px;
+  font: inherit;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  outline: none;
   cursor: pointer;
 }
-#lang-select:hover { border-color: var(--accent); }
-#lang-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#lang-picker option { background: var(--panel); }
 main {
   width: min(92vw, 640px);
   padding: 20px 22px;
@@ -116,10 +129,10 @@ li b { color: var(--accent); }
 <body>
 <nav class="topbar">
   <a class="back-link" id="back-link" href="./"></a>
-  <select id="lang-select"></select>
+  <div id="lang-picker"></div>
 </nav>
 <main id="rules"></main>
-<script src="i18n.js"></script>
+<script src="i18n.js?v=5c811e63c0"></script>
 <script>
 'use strict';
 
@@ -128,6 +141,7 @@ const EMOJI = { 1: '🕸️', 2: '🐘', 3: '🦁', 4: '🐯', 5: '🐺', 6: '�
 const RULES_SEEN_KEY = 'dark-jungle-chess-rules-seen';
 
 let lang = DJC.loadLang();
+let updateLangPicker = () => {};
 
 function render() {
   const T = DJC.T[lang], R = T.rules;
@@ -136,9 +150,7 @@ function render() {
   DJC.applyLang(lang);
   document.title = `${R.title} · ${T.title}`;
   document.getElementById('back-link').textContent = R.back;
-  const select = document.getElementById('lang-select');
-  select.value = lang;
-  select.setAttribute('aria-label', T.language);
+  updateLangPicker(lang);
   const rankRow = el('div', 'rank-row');
   for (let r = 1; r <= 8; r++) rankRow.append(el('span', 'rank-chip', el('span', 'r', r), `${EMOJI[r]} ${T.animal[r - 1]}`));
   const parts = [el('h1', '', R.title), el('h2', '', DJC.fmt(R.ranks, vars)), rankRow];
@@ -165,7 +177,7 @@ function withBold(text) {
 
 if (typeof document !== 'undefined') {
   try { window.localStorage.setItem(RULES_SEEN_KEY, '1'); } catch (e) { /* 忽略 */ }
-  DJC.fillLangSelect(document.getElementById('lang-select'), lang, l => { lang = l; DJC.saveLang(l); render(); });
+  updateLangPicker = DJC.mountLangPicker(document.getElementById('lang-picker'), l => { lang = l; DJC.saveLang(l); render(); });
   render();
 }
 </script>

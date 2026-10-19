@@ -1617,7 +1617,7 @@ T.ko = {
 T.fa = {
   name: "فارسی", htmlLang: "fa",
   title: "شطرنج جنگل پنهان",
-  tagline: "شطرنج جنگل ۴×۴ با مهره‌های پنهان، برای دو بازیکن روی یک صفحه.",
+  tagline: "شطرنج جنگل 4×4 با مهره‌های پنهان، برای دو بازیکن روی یک صفحه.",
   language: "زبان", restart: "بازی جدید", playAgain: "دوباره بازی کن",
   confirmRestart: "این بازی هنوز تمام نشده. با این حال بازی جدید شروع شود؟",
   rulesLink: "📖 روش بازی", rulesLinkNew: "📖 تازه‌واردی؟ روش بازی",
@@ -1651,7 +1651,7 @@ T.fa = {
     ranks: "درجهٔ مهره‌ها (عدد کوچک‌تر قوی‌تر است، اما {a8} {a1} را می‌زند)",
     sections: [
       ["چیدمان", [
-        "صفحهٔ ۴×۴ پر شروع می‌شود: ۱۶ مهره، ۸ قرمز و ۸ سیاه، همه وارونه و درهم.",
+        "صفحهٔ 4×4 پر شروع می‌شود: 16 مهره، 8 قرمز و 8 سیاه، همه وارونه و درهم.",
         "دو بازیکن روی یک دستگاه به نوبت بازی می‌کنند.",
       ]],
       ["زدن", [
@@ -1660,12 +1660,12 @@ T.fa = {
         "{a8} (8) فقط {a1} (1) را می‌زند.",
         "درجهٔ یکسان یعنی **نابودی دوطرفه**: هر دو مهره حذف می‌شوند و خانه خالی می‌شود.",
       ]],
-      ["مرحلهٔ ۱ · انتخاب رنگ", [
+      ["مرحلهٔ 1 · انتخاب رنگ", [
         "در هر دور، اول بازیکن 1 و بعد بازیکن 2 هرکدام یک مهرهٔ پنهان را برمی‌گردانند.",
         "اگر رنگ‌ها فرق کنند، هر بازیکن رنگی را که برگردانده می‌گیرد. اگر یکی باشند، دور دیگری بازی می‌شود.",
         "بازیکن 1 شروع می‌کند. مهره‌هایی که اینجا رو شده‌اند روی صفحه می‌مانند و عادی بازی می‌کنند.",
       ]],
-      ["مرحلهٔ ۲ · نبرد (در هر نوبت یک کار)", [
+      ["مرحلهٔ 2 · نبرد (در هر نوبت یک کار)", [
         "**برگرداندن**: هر مهرهٔ پنهانی را رو کن. ممکن است مال حریف باشد.",
         "**حرکت یا زدن**: روی یکی از مهره‌های روشدهٔ خودت بزن، سپس روی خانهٔ روشن. نقطهٔ سبز یعنی رفتن به خانهٔ خالی؛ قاب قرمز یعنی زدن. مهره‌ها یک خانه به بالا، پایین، چپ یا راست می‌روند و فقط مهره‌های روشده را می‌زنند.",
         "وقتی مهره‌ای انتخاب شده، زدن روی خانهٔ دیگر فقط انتخاب را لغو می‌کند و هرگز مهره‌ای را برنمی‌گرداند.",
@@ -2024,7 +2024,7 @@ const LANG_KEY = "dark-jungle-chess-lang";
 
 const has = code => typeof code === "string" && Object.hasOwn(T, code);
 
-// Stored choice wins, then the first browser language we have, then English.
+// Stored choice wins, then the first browser language we have, then Chinese.
 function pickLang(stored, prefs) {
   if (has(stored)) return stored;
   for (const pref of prefs || []) {
@@ -2034,7 +2034,7 @@ function pickLang(stored, prefs) {
     if (base === "tl") return "fil";
     if (has(base)) return base;
   }
-  return "en";
+  return "zh";
 }
 
 function loadLang() {
@@ -2056,20 +2056,29 @@ function applyLang(code) {
   document.body.classList.toggle("cjk", CJK.has(code));
 }
 
-function fillLangSelect(select, current, onChange) {
-  select.replaceChildren(...Object.keys(T).map(code => {
+// A globe plus one dropdown with every language, each in its own script. Returns update(code), called on every render.
+function mountLangPicker(root, onChange) {
+  const globe = document.createElement("span");
+  globe.textContent = "🌐";
+  globe.setAttribute("aria-hidden", "true");
+  const select = document.createElement("select");
+  select.append(...Object.keys(T).map(code => {
     const option = document.createElement("option");
     option.value = code;
     option.lang = T[code].htmlLang;
     option.textContent = T[code].name;
     return option;
   }));
-  select.value = current;
-  select.addEventListener("change", () => onChange(select.value));
+  select.addEventListener("change", () => { if (has(select.value)) onChange(select.value); });
+  root.replaceChildren(globe, select);
+  return code => {
+    select.value = code;
+    select.setAttribute("aria-label", T[code].language);
+  };
 }
 
 return Object.freeze({
-  T, RTL, pickLang, loadLang, saveLang, fmt, applyLang, fillLangSelect,
+  T, RTL, pickLang, loadLang, saveLang, fmt, applyLang, mountLangPicker,
   isCjk: code => CJK.has(code),
 });
 })();

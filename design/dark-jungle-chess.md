@@ -94,7 +94,7 @@ flowchart TD
 - 顶部状态栏：当前轮到谁（Player 1 / Player 2 及其颜色）、阶段提示（如「定色阶段：请 Player 2 翻一个子」）。
 - 两侧被吃区：分别显示红黑双方已阵亡棋子。
 - 结束时显示胜者遮罩层 +「再来一局」按钮（重新洗牌）。
-- 顶栏：左侧「📖 玩法说明」链接到独立的规则页 `rules.html`（棋子等级、吃子规则、定色、对战、胜负），右侧语言下拉框。玩家打开过规则页之前，链接高亮显示为「新手？先看玩法说明」。规则页的语言设置与游戏共用。
+- 顶栏：左侧「📖 玩法说明」链接到独立的规则页 `rules.html`（棋子等级、吃子规则、定色、对战、胜负），右侧「🌐 + 语言下拉框」，30 种语言各用本语言书写，简体中文和 English 排在最前。玩家打开过规则页之前，链接高亮显示为「新手？先看玩法说明」。规则页的语言设置与游戏共用。
 - 规则页里的步数上限与游戏各写一份，测试会校验两边一致。
 - 无障碍：格子可用 Tab 聚焦，方向键移动、回车/空格操作；每格有读屏标签（位置、棋子、是否选中/可走/可吃）；状态栏为 `aria-live`；结束画面为对话框并自动聚焦「再来一局」。
 - 页面带 meta description、Open Graph 标签与 emoji favicon，分享链接时有标题和简介。
@@ -103,7 +103,7 @@ flowchart TD
 
 - 30 种语言（按使用人数）：简体中文、English、हिन्दी、Español、العربية、Français、বাংলা、Português、Русский、Bahasa Indonesia、اردو、Deutsch、日本語、Naijá、मराठी、తెలుగు、Türkçe、Hausa、தமிழ்、Kiswahili、繁體中文、Tiếng Việt、Filipino、한국어、فارسی、Basa Jawa、Italiano、ਪੰਜਾਬੀ、ไทย、ગુજરાતી。译文由 AI 生成，未经母语者校对。
 - 文案集中在 `docs/dark-jungle-chess/i18n.js`，游戏页、规则页、首页共用。只有纯字符串：`{占位符}` 由 `DJC.fmt` 替换，`**粗体**` 由规则页转成 `<b>`，始终以文本写入 DOM。每种语言的键、占位符、`**` 数量必须与英文一致（测试校验）。
-- 语言选择顺序：localStorage 里保存的选择 → 浏览器 `navigator.languages` 中第一个支持的语言（zh-TW/HK/MO/Hant → 繁體中文，tl → Filipino）→ English。
+- 语言选择顺序：localStorage 里保存的选择 → 浏览器 `navigator.languages` 中第一个支持的语言（zh-TW/HK/MO/Hant → 繁體中文，tl → Filipino）→ 简体中文。
 - 阿拉伯语、乌尔都语、波斯语把 `<html dir>` 设为 `rtl`，整页镜像；棋盘固定 `direction: ltr`，保证「第几行第几列」的读屏标签与画面一致。
 - 中日文（`body.cjk`）句子之间不加空格、用较宽字距；被吃区小卡片只有中日文显示动物名，其他语言显示等级数字。
 
@@ -111,7 +111,7 @@ flowchart TD
 
 - 不用 `innerHTML` 等 HTML 字符串接口，所有文本经 `textContent` / `createElement` 写入 DOM（测试会扫描页面）。
 - 每个页面带 `<meta>` CSP：`default-src 'none'`，内联 `<script>` / `<style>` 只放行其 sha256 哈希，外部脚本只放行同源（`'self'`，即 `i18n.js`），并开启 Trusted Types（`require-trusted-types-for 'script'; trusted-types 'none'`），即使将来误用 HTML 字符串接口也会被浏览器拒绝。
-- 改了任何页面的内联脚本或样式后运行 `node tools/csp.js` 重算哈希；测试会校验哈希是否最新。
+- 改了任何页面的内联脚本或样式、或 `i18n.js` 后运行 `node tools/csp.js`：重算 CSP 哈希，并把外部脚本地址写成 `i18n.js?v=<内容哈希>`（GitHub Pages 对所有文件缓存 10 分钟，带版本号才不会出现新页面配旧脚本）。测试会校验两者是否最新。
 - `<meta>` CSP 不支持 `frame-ancestors` 和上报；GitHub Pages 不能设响应头，这两项接受缺失。
 
 ## 实现步骤

@@ -6,7 +6,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-DaeI3ljHKs55okcS78+PwaRg7h3WvRyThwVEqg+u3Wk='; style-src 'sha256-zbxjjJC9oIqeaC/m1iqsluwTGT4wmVeSX7HuQbkJwXQ='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-DuiJ39po0HVW/wpntlAKU00UpdklsQPUtTjdldWlCk0='; style-src 'sha256-dZsB/mhXgF1ACkfz7vB9zjvdqc3v8nyg/Nhszg/xfvg='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>暗棋斗兽棋</title>
 <meta name="description" content="暗棋斗兽棋 · Dark Jungle Chess：4×4 翻棋版斗兽棋，双人同屏对战，支持 30 种语言。A 4×4 hidden-piece Jungle chess for two players on one screen, in 30 languages.">
@@ -46,12 +46,14 @@ html:lang(ja) body { font-family: "Hiragino Sans", "Yu Gothic", Meiryo, sans-ser
 .topbar {
   width: min(92vw, 640px);
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
 }
 .rules-link {
+  white-space: nowrap;
   padding: 5px 14px;
   font-size: 12px;
   color: var(--muted);
@@ -63,18 +65,29 @@ html:lang(ja) body { font-family: "Hiragino Sans", "Yu Gothic", Meiryo, sans-ser
 }
 .rules-link:hover { color: var(--accent); border-color: var(--accent); }
 .rules-link.new { background: var(--accent); border-color: var(--accent); color: #1b1405; font-weight: 700; }
-#lang-select {
-  padding: 5px 10px;
-  font: inherit;
+#lang-picker {
+  display: flex;
+  align-items: center;
+  margin-inline-start: auto;
+  padding-inline-start: 10px;
   font-size: 12px;
-  color: var(--text);
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 999px;
+}
+#lang-picker:hover { border-color: var(--accent); }
+#lang-picker:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+#lang-picker select {
+  max-width: 12em;
+  padding: 5px 10px 5px 6px;
+  font: inherit;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  outline: none;
   cursor: pointer;
 }
-#lang-select:hover { border-color: var(--accent); }
-#lang-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#lang-picker option { background: var(--panel); }
 header { text-align: center; margin-bottom: 14px; }
 h1 {
   font-size: 26px;
@@ -305,7 +318,7 @@ body.cjk .overlay-box button { letter-spacing: 3px; }
 <div id="app">
 <nav class="topbar">
   <a class="rules-link" id="rules-link" href="rules.html"></a>
-  <select id="lang-select"></select>
+  <div id="lang-picker"></div>
 </nav>
 <header>
   <h1 id="title">暗棋斗兽棋</h1>
@@ -335,7 +348,7 @@ body.cjk .overlay-box button { letter-spacing: 3px; }
     <button id="overlay-restart"></button>
   </div>
 </div>
-<script src="i18n.js"></script>
+<script src="i18n.js?v=5c811e63c0"></script>
 <script>
 'use strict';
 
@@ -462,6 +475,7 @@ function loadGame() {
 }
 
 let lang = DJC.loadLang();
+let updateLangPicker = () => {};
 
 function L() { return I18N[lang]; }
 
@@ -682,9 +696,7 @@ function renderStatic() {
   document.getElementById('overlay-restart').textContent = L().playAgain;
   document.getElementById('tray-red-title').textContent = L().trayRed;
   document.getElementById('tray-black-title').textContent = L().trayBlack;
-  const select = document.getElementById('lang-select');
-  select.value = lang;
-  select.setAttribute('aria-label', L().language);
+  updateLangPicker(lang);
   const seen = storageGet('localStorage', RULES_SEEN_KEY) === '1';
   const link = document.getElementById('rules-link');
   link.textContent = seen ? L().rulesLink : L().rulesLinkNew;
@@ -809,7 +821,7 @@ if (typeof document !== 'undefined') {
     newGame();
     boardEl.children[0].focus();
   });
-  DJC.fillLangSelect(document.getElementById('lang-select'), lang, setLang);
+  updateLangPicker = DJC.mountLangPicker(document.getElementById('lang-picker'), setLang);
   // 从规则页按返回键回来时，页面可能直接从 bfcache 恢复，需要刷新链接状态和在规则页改过的语言
   window.addEventListener('pageshow', e => { if (e.persisted && state) { lang = DJC.loadLang(); render(); } });
   state = loadGame();

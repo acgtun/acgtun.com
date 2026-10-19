@@ -50,7 +50,7 @@ const loadPage = () => new Function(I18N_SRC + '\n' + scriptOf(html) +
   'canCapture, legalTargets, setLang, fmtMsg, IDLE_DRAW_LIMIT, DJC, SAVE_KEY };')();
 const game = loadPage();
 const { DJC } = game;
-const { PAGES, META, metaFor } = require('../tools/csp.js');
+const { PAGES, build } = require('../tools/csp.js');
 const rules = new Function(I18N_SRC + '\n' + scriptOf(rulesHtml) +
   '\nreturn { IDLE_DRAW_LIMIT, render, setLang: l => { lang = l; } };')();
 
@@ -216,12 +216,11 @@ const tests = {
     }
   },
 
-  'Content-Security-Policy hashes are current (fix: node tools/csp.js)'() {
+  'CSP hashes and script versions are current (fix: node tools/csp.js)'() {
     for (const file of PAGES) {
       const src = fs.readFileSync(file, 'utf8');
-      const meta = src.match(META);
-      assert.ok(meta, `${file}: missing CSP meta`);
-      assert.strictEqual(meta[0], metaFor(src), `${path.relative(process.cwd(), file)}: stale CSP, run node tools/csp.js`);
+      assert.ok(src === build(src, file), `${path.relative(process.cwd(), file)}: stale, run node tools/csp.js`);
+      if (/<script src=/.test(src)) assert.ok(/<script src="[^"]+\?v=[0-9a-f]{10}">/.test(src), `${file}: unversioned script`);
     }
   },
 
@@ -292,13 +291,25 @@ const tests = {
     assert.strictEqual(game.fmtMsg(parts), '玩家 1（红方）翻开了红象。轮到玩家 2（黑方）：翻暗子，或移动/吃子');
   },
 
-  'language choice: saved choice, then browser languages, then English'() {
+  'language choice: saved choice, then browser languages, then Chinese'() {
     const cases = [
       ['ja', ['fr'], 'ja'], ['xx', ['fr-FR'], 'fr'], [null, ['zh-TW'], 'zh-Hant'], [null, ['zh-Hant-HK'], 'zh-Hant'],
       [null, ['zh-CN'], 'zh'], [null, ['pt-BR'], 'pt'], [null, ['tl-PH'], 'fil'], [null, ['nl', 'de'], 'de'],
-      [null, ['nl'], 'en'], [null, undefined, 'en'], ['__proto__', ['__proto__'], 'en'],
+      [null, ['nl'], 'zh'], [null, undefined, 'zh'], ['__proto__', ['__proto__'], 'zh'], [null, ['en-GB'], 'en'],
     ];
     for (const [stored, prefs, want] of cases) assert.strictEqual(DJC.pickLang(stored, prefs), want, `${stored} ${prefs}`);
+  },
+
+  'language picker: a globe and one dropdown listing every language'() {
+    const root = fakeEl(), chosen = [];
+    const update = DJC.mountLangPicker(root, code => chosen.push(code));
+    const [globe, select] = root.children;
+    assert.strictEqual(globe.textContent, '🌐');
+    assert.deepStrictEqual(select.children.map(o => o.value), Object.keys(DJC.T));
+    assert.deepStrictEqual(select.children.slice(0, 2).map(o => o.value), ['zh', 'en']);
+    update('ja');
+    assert.strictEqual(select.value, 'ja');
+    assert.strictEqual(select.attrs['aria-label'], DJC.T.ja.language);
   },
 
   'Arabic, Urdu and Persian switch the page to right-to-left'() {
