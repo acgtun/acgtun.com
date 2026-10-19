@@ -103,6 +103,7 @@ flowchart TD
 
 - 30 种语言（按使用人数）：简体中文、English、हिन्दी、Español、العربية、Français、বাংলা、Português、Русский、Bahasa Indonesia、اردو、Deutsch、日本語、Naijá、मराठी、తెలుగు、Türkçe、Hausa、தமிழ்、Kiswahili、繁體中文、Tiếng Việt、Filipino、한국어、فارسی、Basa Jawa、Italiano、ਪੰਜਾਬੀ、ไทย、ગુજરાતી。译文由 AI 生成，未经母语者校对。
 - 文案集中在 `docs/dark-jungle-chess/i18n.js`，游戏页、规则页、首页共用。只有纯字符串：`{占位符}` 由 `DJC.fmt` 替换，`**粗体**` 由规则页转成 `<b>`，始终以文本写入 DOM。每种语言的键、占位符、`**` 数量必须与英文一致（测试校验）。
+- 措辞：颜色只作形容词修饰"棋子 / 方 / 阵营"（"Captured black pieces"、"黑方"），不单独当群体名词与"被吃 / 阵亡"等词连用，避免读成指人群。
 - 语言选择顺序：localStorage 里保存的选择 → 浏览器 `navigator.languages` 中第一个支持的语言（zh-TW/HK/MO/Hant → 繁體中文，tl → Filipino）→ 简体中文。
 - 阿拉伯语、乌尔都语、波斯语把 `<html dir>` 设为 `rtl`，整页镜像；棋盘固定 `direction: ltr`，保证「第几行第几列」的读屏标签与画面一致。
 - 中日文（`body.cjk`）句子之间不加空格、用较宽字距；被吃区小卡片只有中日文显示动物名，其他语言显示等级数字。
