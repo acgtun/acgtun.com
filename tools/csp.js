@@ -14,6 +14,18 @@ const hashes = (html, tag) =>
   [...html.matchAll(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'g'))]
     .map(m => `'sha256-${crypto.createHash('sha256').update(m[1], 'utf8').digest('base64')}'`);
 
+// A page that plays online names its game server in <meta id="online-server">; it may connect only to that server
+// and to the local one from `npm run dev` in server/ (used when the page itself is served from 127.0.0.1).
+const ONLINE_SERVER = /<meta name="online-server" id="online-server" content="([^"]*)">/;
+const LOCAL_SERVER = 'http://127.0.0.1:8787';
+
+function connectSrc(html) {
+  const m = ONLINE_SERVER.exec(html);
+  if (!m) return [];
+  const origins = [LOCAL_SERVER, m[1]].filter(Boolean).map(u => new URL(u).origin);
+  return [`connect-src ${origins.flatMap(o => [o, o.replace(/^http/, 'ws')]).join(' ')}`];
+}
+
 // frame-ancestors and report-uri are ignored in a <meta> policy, so they are left out.
 function policyFor(html) {
   const scripts = hashes(html, 'script');
@@ -23,6 +35,7 @@ function policyFor(html) {
     "default-src 'none'",
     `script-src ${scripts.length ? scripts.join(' ') : "'none'"}`,
     `style-src ${styles.length ? styles.join(' ') : "'none'"}`,
+    ...connectSrc(html),
     'img-src data:',
     "base-uri 'none'",
     "form-action 'none'",

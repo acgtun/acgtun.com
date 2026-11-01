@@ -6,7 +6,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-gQkzxGyCK1N9cwHtPQqb94JlFksapR7f234TCqF8cYs='; style-src 'sha256-VD8vsETTuBvPjlclOsE2GhRR04FBc+YD1pTguVTinAY='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-QR/vHsiguGNq4tnrcP5bJnVzvsFpZyW+YPk9VQo7HFw='; style-src 'sha256-4ExiPMLYCgK5FogTqp3Z+4ClHiFwMLS8nuYYfXf2+48='; connect-src http://127.0.0.1:8787 ws://127.0.0.1:8787; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>暗棋斗兽棋</title>
 <meta name="description" content="暗棋斗兽棋 · Dark Jungle Chess：4×4 翻棋版斗兽棋，双人同屏对战，支持 30 种语言。A 4×4 hidden-piece Jungle chess for two players on one screen, in 30 languages.">
@@ -14,6 +14,7 @@
 <meta property="og:title" content="暗棋斗兽棋 · Dark Jungle Chess">
 <meta property="og:description" content="4×4 翻棋版斗兽棋，双人同屏对战。A 4×4 hidden-piece Jungle chess for two players on one screen.">
 <meta property="og:url" content="https://acgtun.com/dark-jungle-chess/">
+<meta name="online-server" id="online-server" content="">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
 <style>
 :root {
@@ -262,8 +263,9 @@ body.cjk .tray h3 { letter-spacing: 2px; }
 }
 .mini.red { color: var(--red); }
 .mini.black { color: var(--black); }
-#restart {
-  margin-top: 16px;
+[hidden] { display: none !important; }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 16px; }
+.actions button {
   padding: 8px 26px;
   font-size: 14px;
   color: var(--text);
@@ -273,8 +275,42 @@ body.cjk .tray h3 { letter-spacing: 2px; }
   cursor: pointer;
   transition: all .2s;
 }
-body.cjk #restart { letter-spacing: 2px; }
-#restart:hover { border-color: var(--accent); color: var(--accent); }
+body.cjk .actions button { letter-spacing: 2px; }
+.actions button:hover { border-color: var(--accent); color: var(--accent); }
+#online {
+  max-width: 640px;
+  margin: 8px auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--accent);
+}
+#online-text:empty { display: none; }
+.invite { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+#online-link {
+  width: min(80vw, 340px);
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  direction: ltr;
+}
+.invite button, #online-claim {
+  padding: 6px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1b1405;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
 #overlay {
   position: fixed; top: 0; right: 0; bottom: 0; left: 0;
   background: rgba(10,11,15,.78);
@@ -309,6 +345,9 @@ body.cjk .overlay-box h2 { letter-spacing: 4px; }
   font-weight: 700;
 }
 body.cjk .overlay-box button { letter-spacing: 3px; }
+.overlay-box button:disabled { opacity: .6; cursor: default; }
+.overlay-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+#overlay-leave { color: var(--text); background: transparent; border: 1px solid var(--line); font-weight: 400; }
 #confirm {
   margin: auto;
   max-width: min(92vw, 420px);
@@ -348,6 +387,15 @@ body.cjk .overlay-box button { letter-spacing: 3px; }
     <div class="badge" id="badge-p2"><span class="chip" id="chip-p2"></span><span id="label-p2"></span></div>
   </div>
   <div id="status" aria-live="polite"></div>
+  <div id="online" hidden>
+    <div id="online-text" aria-live="polite"></div>
+    <div class="invite" id="online-invite">
+      <input id="online-link" readonly>
+      <button id="online-copy"></button>
+      <button id="online-share"></button>
+    </div>
+    <button id="online-claim"></button>
+  </div>
 </header>
 <main>
   <div class="tray">
@@ -360,14 +408,22 @@ body.cjk .overlay-box button { letter-spacing: 3px; }
     <div class="tray-list" id="tray-black"></div>
   </div>
 </main>
-<button id="restart"></button>
+<div class="actions">
+  <button id="restart"></button>
+  <button id="online-start" hidden></button>
+  <button id="online-resign" hidden></button>
+  <button id="online-leave" hidden></button>
+</div>
 </div>
 </div>
 <div id="overlay">
   <div class="overlay-box" role="dialog" aria-labelledby="overlay-title" aria-describedby="overlay-reason">
     <h2 id="overlay-title"></h2>
     <p id="overlay-reason"></p>
-    <button id="overlay-restart"></button>
+    <div class="overlay-actions">
+      <button id="overlay-restart"></button>
+      <button id="overlay-leave" hidden></button>
+    </div>
   </div>
 </div>
 <dialog id="confirm" aria-labelledby="confirm-text">
@@ -377,7 +433,7 @@ body.cjk .overlay-box button { letter-spacing: 3px; }
     <button id="confirm-ok"></button>
   </div>
 </dialog>
-<script src="i18n.js?v=a2e9667e6c"></script>
+<script src="i18n.js?v=a4b7ec15d3"></script>
 <script src="engine.js?v=5f4a81c63c"></script>
 <script>
 'use strict';
@@ -409,9 +465,12 @@ function storageSet(kind, key, value) {
   try { window[kind].setItem(key, value); } catch (e) { /* 忽略 */ }
 }
 
-// 对局存在 sessionStorage：去看规则再返回、或刷新页面都不会丢局。
-// 存档是外部输入：逐字段校验，任何一项不对就整份丢弃，开新局。
-function saveGame() { storageSet('sessionStorage', SAVE_KEY, JSON.stringify(state)); }
+// 对局存在 sessionStorage：去看规则再返回、或刷新页面都不会丢局。联网对局不存（服务器有），也不覆盖单机存档。
+// 存档是外部输入：逐字段校验，任何一项不对就整份丢弃，开新局。服务器发来的视图也走同一个校验。
+function saveGame() { if (!online) storageSet('sessionStorage', SAVE_KEY, JSON.stringify(state)); }
+
+// 联网时的暗子：服务器不告诉我们是什么。只能由 stateFromView 放进棋盘，JSON 存档里不可能出现同一个对象。
+const HIDDEN = Object.freeze({ rank: 0, color: null, revealed: false });
 
 const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 const isPiece = p => !!p && typeof p === 'object' && isInt(p.rank, 1, 8) &&
@@ -429,12 +488,13 @@ const isParts = a => Array.isArray(a) && a.length <= 8 && a.every(isMsgPart);
 
 function isValidSave(s) {
   if (!s || typeof s !== 'object' || !['assign', 'play', 'over'].includes(s.phase)) return false;
-  if (!Array.isArray(s.board) || s.board.length !== 16 || !s.board.every(p => p === null || isPiece(p))) return false;
+  if (!Array.isArray(s.board) || s.board.length !== 16 || !s.board.every(p => p === null || p === HIDDEN || isPiece(p))) return false;
   if (!s.captured || !COLORS.every(c => Array.isArray(s.captured[c]) && s.captured[c].every(isPiece))) return false;
   const total = s.board.filter(Boolean).length + s.captured.red.length + s.captured.black.length;
   if (total !== 16) return false;
   if (!s.players || !['p1', 'p2'].every(p => s.players[p] === null || COLORS.includes(s.players[p]))) return false;
-  if (s.phase !== 'assign' && (!s.players.p1 || !s.players.p2)) return false;
+  // 联网时可能在定色阶段就认输或判胜，结束时双方还没有颜色
+  if (s.phase === 'play' && (!s.players.p1 || !s.players.p2)) return false;
   if (!isPlayer(s.current) || !isInt(s.round, 1, 99) || !isInt(s.idleSteps, 0, IDLE_DRAW_LIMIT)) return false;
   if (!Array.isArray(s.roundFlips) || s.roundFlips.length > 2 || !s.roundFlips.every(c => COLORS.includes(c))) return false;
   if (!(s.selected === null || isInt(s.selected, 0, 15))) return false;
@@ -491,12 +551,20 @@ function newGame() {
 
 function onCellClick(i) {
   if (!state || state.phase === 'over') return;
+  if (online && !myTurnOnline()) return;
   if (state.phase === 'assign') act({ flip: i });
   else playClick(i);
 }
 
-// 同屏对战：当前玩家就是操作者
+// 同屏对战：当前玩家就是操作者。联网时只把意图发给服务器，等它发回新视图再重绘。
 function act(action) {
+  if (online) {
+    if (!send({ t: 'act', n: online.n, a: action })) return;
+    online.pending = true;
+    state.selected = null;
+    render();
+    return;
+  }
   if (!E.apply(state, state.current, action).ok) return;
   state.selected = null;
   if ('flip' in action) state.lastFlipped = action.flip;
@@ -521,6 +589,211 @@ function playClick(i) {
   render();
 }
 
+/* ---------- 联网对战 ----------
+   对局服务器（server/）持有棋盘、校验每一步，只发来脱敏视图：暗子只有「暗子」，没有等级和颜色。
+   页面只发意图（翻第几格 / 从哪走到哪），收到新视图后整页重绘。协议见 design/dark-jungle-chess-online.md。 */
+
+// 本地页面（127.0.0.1:8000）连本地服务器（server/ 下 npm run dev）；线上用 <meta id="online-server"> 的地址，为空时不显示联网入口。
+// tools/csp.js 按这两个地址生成 connect-src。
+const LOCAL_SERVER = 'http://127.0.0.1:8787';
+const ONLINE_SERVER = typeof location !== 'undefined' && location.hostname === '127.0.0.1' ? LOCAL_SERVER
+  : (typeof document !== 'undefined' && document.getElementById('online-server').content) || '';
+const ONLINE_KEY = 'dark-jungle-chess-online';   // localStorage：{ 房间号: { token, at } }，座位凭证
+const ROOM_CODE = /^[0-9A-HJKMNP-TV-Z]{10}$/;
+const PING_MS = 20000;
+const CLAIM_MS = 5 * 60000;           // 与服务器一致：对手离开满 5 分钟才能判胜
+const TOKEN_TTL_MS = 25 * 3600000;    // 服务器 24 小时没动静就删房间
+
+// 联网模式时的连接与座位信息；单机模式为 null。
+// status：creating 建房中 / connecting 连接中 / open 已连上 / retrying 断线重连 / closed 不再重连（note 说明原因）
+let online = null;
+
+function loadTokens() {
+  const out = {};
+  try {
+    const all = JSON.parse(storageGet('localStorage', ONLINE_KEY));
+    for (const [room, e] of Object.entries(all && typeof all === 'object' ? all : {})) {
+      if (ROOM_CODE.test(room) && e && typeof e.token === 'string' && e.token.length <= 64 &&
+        Number.isFinite(e.at) && Date.now() - e.at < TOKEN_TTL_MS) out[room] = { token: e.token, at: e.at };
+    }
+  } catch (e) { /* 坏数据当作没有 */ }
+  return out;
+}
+function saveToken(room, token) {
+  const all = loadTokens();
+  all[room] = { token, at: Date.now() };
+  storageSet('localStorage', ONLINE_KEY, JSON.stringify(all));
+}
+function forgetToken(room) {
+  const all = loadTokens();
+  delete all[room];
+  storageSet('localStorage', ONLINE_KEY, JSON.stringify(all));
+}
+
+const toPiece = c => ({ rank: c.rank, color: c.color, revealed: true });
+const placeholderState = () => ({
+  phase: 'assign', board: Array(16).fill(HIDDEN), players: { p1: null, p2: null }, current: 'p1', round: 1, roundFlips: [],
+  captured: { red: [], black: [] }, idleSteps: 0, winner: undefined, message: [], overReason: [], selected: null, lastFlipped: null,
+});
+
+// 服务器视图 → 页面状态（与单机同一结构，渲染代码不用分两套）。结构不对会抛错或通不过 isValidSave，整条消息丢弃。
+function stateFromView(v) {
+  const parts = a => a.map(x => (x.p ? {
+    k: x.k, p: Object.fromEntries(Object.entries(x.p).map(([key, val]) => [key, val && typeof val === 'object' ? toPiece(val) : val])),
+  } : { k: x.k }));
+  return {
+    phase: v.phase, current: v.current, players: { p1: v.players.p1, p2: v.players.p2 }, round: v.round, roundFlips: [],
+    board: v.board.map(c => (c === null ? null : c.hidden === true ? HIDDEN : toPiece(c))),
+    captured: { red: v.captured.red.map(toPiece), black: v.captured.black.map(toPiece) },
+    idleSteps: v.idleSteps, winner: v.winner, message: parts(v.message), overReason: parts(v.overReason),
+    selected: null, lastFlipped: null,
+  };
+}
+
+const opponent = seat => (seat === 'p1' ? 'p2' : 'p1');
+const myTurnOnline = () => online.status === 'open' && online.seated.p2 && !online.pending && state.current === online.seat;
+const canClaim = () => online.status === 'open' && online.seated.p2 && state.phase !== 'over' &&
+  state.current !== online.seat && Date.now() - online.changedAt >= CLAIM_MS;
+const inviteLink = () => `${location.origin}${location.pathname}?room=${online.room}`;
+
+function enterOnline(room) {
+  online = {
+    room, seat: null, n: -1, seated: { p1: false, p2: false }, present: { p1: false, p2: false }, rematch: { p1: false, p2: false },
+    status: room ? 'connecting' : 'creating', note: null, ws: null, attempts: 0, pending: false, changedAt: Date.now(),
+    retryTimer: null, pingTimer: null, copiedUntil: 0,
+  };
+  state = placeholderState();
+  render();
+  if (room) connect();
+}
+
+async function startOnline() {
+  enterOnline(null);
+  const mine = online;
+  try {
+    const res = await fetch(`${ONLINE_SERVER}/rooms`, { method: 'POST' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { room, token } = await res.json();
+    if (!ROOM_CODE.test(room) || typeof token !== 'string') throw new Error('bad reply');
+    if (online !== mine) return;   // 等待期间已经退出
+    saveToken(room, token);
+    online.room = room;
+    online.status = 'connecting';
+    history.replaceState(null, '', `?room=${room}`);
+    connect();
+  } catch (e) {
+    if (online !== mine) return;
+    online.status = 'closed';
+    online.note = 'unavailable';
+    render();
+  }
+}
+
+function leaveOnline() {
+  const o = online;
+  online = null;
+  if (o) {
+    clearTimeout(o.retryTimer);
+    clearInterval(o.pingTimer);
+    if (o.ws) { o.ws.onclose = null; try { o.ws.close(1000); } catch (e) { /* 已关闭 */ } }
+  }
+  history.replaceState(null, '', location.pathname);
+  state = loadGame();
+  if (state) render(); else newGame();
+}
+
+function connect() {
+  clearTimeout(online.retryTimer);
+  clearInterval(online.pingTimer);
+  if (online.ws) { online.ws.onclose = null; try { online.ws.close(1000); } catch (e) { /* 已关闭 */ } }
+  const ws = new WebSocket(`${ONLINE_SERVER.replace(/^http/, 'ws')}/rooms/${online.room}/ws`);
+  online.ws = ws;
+  ws.onopen = () => {
+    if (!online || ws !== online.ws) return;
+    const saved = loadTokens()[online.room];
+    ws.send(JSON.stringify({ t: 'hello', v: 1, token: saved ? saved.token : null }));
+    // ping 由服务器直接回 pong，不唤醒房间；顺便刷新「对手很久没动」的判胜按钮
+    online.pingTimer = setInterval(() => { if (ws.readyState === 1) ws.send('ping'); if (online) renderOnline(); }, PING_MS);
+  };
+  ws.onmessage = e => { if (online && ws === online.ws) onServerMessage(e.data); };
+  ws.onclose = e => { if (online && ws === online.ws) onClosed(e.code); };
+}
+
+// 断线：房间没了、座位满了、被别的标签页顶掉时不再重连；其他情况指数退避重连（1、2、4……最多 30 秒）
+const FINAL_CLOSE = { 4000: 'gone', 4004: 'gone', 4003: 'roomFull', 4001: 'replaced', 1008: 'unavailable', 1009: 'unavailable' };
+function onClosed(code) {
+  clearInterval(online.pingTimer);
+  online.pending = false;
+  if (online.status === 'closed') { render(); return; }
+  if (FINAL_CLOSE[code]) {
+    online.status = 'closed';
+    online.note = FINAL_CLOSE[code];
+    if (code === 4000 || code === 4004) forgetToken(online.room);
+  } else {
+    online.status = 'retrying';
+    if (online.attempts >= 3) online.note = 'unavailable';
+    online.retryTimer = setTimeout(connect, Math.min(30000, 1000 * 2 ** online.attempts++));
+  }
+  render();
+}
+
+// 切回前台、网络恢复、从 bfcache 返回时，断着的连接立即重连
+function wake() {
+  if (online && online.room && online.status === 'retrying') { online.attempts = 0; connect(); }
+}
+
+function send(msg) {
+  if (!online || !online.ws || online.ws.readyState !== 1) return false;
+  online.ws.send(JSON.stringify(msg));
+  return true;
+}
+
+const isSeatFlags = o => !!o && typeof o === 'object' && typeof o.p1 === 'boolean' && typeof o.p2 === 'boolean';
+
+function onServerMessage(text) {
+  if (text === 'pong' || typeof text !== 'string') return;
+  let m;
+  try { m = JSON.parse(text); } catch (e) { return; }
+  if (!m || typeof m !== 'object') return;
+  if (m.t === 'welcome' && isPlayer(m.seat) && typeof m.token === 'string' && m.token.length <= 64) {
+    saveToken(online.room, m.token);
+  } else if (m.t === 'err' && typeof m.k === 'string') {
+    online.pending = false;
+    if (m.k === 'badToken') { forgetToken(online.room); online.status = 'closed'; online.note = 'gone'; }
+    else if (m.k === 'roomFull') { online.status = 'closed'; online.note = 'roomFull'; }
+    else online.note = m.k === 'cannotClaim' ? 'cannotClaim' : 'rejected';
+    state.selected = null;
+    render();
+  } else if (m.t === 'state' && Number.isInteger(m.n) && isPlayer(m.you) &&
+    isSeatFlags(m.seated) && isSeatFlags(m.online) && isSeatFlags(m.rematch)) {
+    let next;
+    try { next = stateFromView(m.view); } catch (e) { return; }
+    if (!isValidSave(next)) return;
+    if (online.status !== 'open') online.note = null;
+    if (m.n !== online.n || m.you !== online.seat) {
+      online.changedAt = Date.now();
+      online.note = null;
+      if (m.last && Number.isInteger(m.last.flip)) next.lastFlipped = m.last.flip;
+      const saved = loadTokens()[online.room];
+      if (saved) saveToken(online.room, saved.token);   // 房间还活着，凭证跟着续期
+    } else {
+      next.selected = state.selected;   // 只是对手上线/下线：保留选中
+    }
+    Object.assign(online, {
+      n: m.n, seat: m.you, seated: m.seated, present: m.online, rematch: m.rematch, status: 'open', attempts: 0, pending: false,
+    });
+    state = next;
+    render();
+  }
+}
+
+// 确认框问的是哪件事：'restart' 重新开局，'resign' 认输
+let confirmKind = 'restart';
+function confirmed() {
+  if (confirmKind === 'resign') send({ t: 'resign' });
+  else newGame();
+}
+
 /* ---------- 渲染 ----------
    只用 textContent / createElement，不拼 HTML 字符串（页面的 CSP 开启了 Trusted Types，innerHTML 会直接报错） */
 
@@ -541,18 +814,26 @@ function render() {
   renderBoard();
   renderTrays();
   renderOverlay();
+  renderOnline();
   state.lastFlipped = null;   // 翻转动画只播一次
   saveGame();
 }
 
 function renderStatic() {
+  const O = L().online;
   DJC.applyLang(lang);
   document.title = L().title;
   document.getElementById('title').textContent = L().title;
   document.getElementById('restart').textContent = L().restart;
-  document.getElementById('overlay-restart').textContent = L().playAgain;
-  document.getElementById('confirm-text').textContent = L().confirmRestart;
-  document.getElementById('confirm-ok').textContent = L().restart;
+  document.getElementById('online-start').textContent = O.start;
+  document.getElementById('online-resign').textContent = O.resign;
+  document.getElementById('online-leave').textContent = O.leave;
+  document.getElementById('overlay-leave').textContent = O.leave;
+  document.getElementById('online-copy').textContent = online && Date.now() < online.copiedUntil ? O.copied : O.copy;
+  document.getElementById('online-share').textContent = O.share;
+  document.getElementById('online-claim').textContent = O.claim;
+  document.getElementById('confirm-text').textContent = confirmKind === 'resign' ? O.confirmResign : L().confirmRestart;
+  document.getElementById('confirm-ok').textContent = confirmKind === 'resign' ? O.resign : L().restart;
   document.getElementById('confirm-cancel').textContent = L().cancel;
   document.getElementById('tray-red-title').textContent = L().trayRed;
   document.getElementById('tray-black-title').textContent = L().trayBlack;
@@ -572,7 +853,10 @@ function renderBadges() {
     badge.classList.toggle('active', state.phase !== 'over' && state.current === p);
     chip.className = 'chip' + (color ? ` ${color}` : '');
     const n = p === 'p1' ? 1 : 2;
-    label.textContent = color ? f(L().badge, { n, color: L()[color] }) : f(L().badgeNoColor, { n });
+    let text = color ? f(L().badge, { n, color: L()[color] }) : f(L().badgeNoColor, { n });
+    if (online && online.seat === p) text = f(L().online.you, { badge: text });
+    else if (online && online.seated.p2 && !online.present[p]) text = f(L().online.offline, { badge: text });
+    label.textContent = text;
   }
 }
 
@@ -637,13 +921,54 @@ function renderOverlay() {
   // 结算对话框打开时，背后的棋局不可聚焦、不可点；顶栏（规则链接、语言）仍可用
   document.getElementById('table').inert = state.phase === 'over';
   if (state.phase !== 'over') { overlay.classList.remove('show'); return; }
-  document.getElementById('overlay-title').textContent =
-    fmtMsg([state.winner === null ? { k: 'draw' } : { k: 'win', p: { player: state.winner } }]);
-  document.getElementById('overlay-reason').textContent = fmtMsg(state.overReason);
+  const O = L().online, again = document.getElementById('overlay-restart');
+  let title = fmtMsg([state.winner === null ? { k: 'draw' } : { k: 'win', p: { player: state.winner } }]);
+  let reason = fmtMsg(state.overReason);
+  again.textContent = L().playAgain;
+  again.disabled = false;
+  document.getElementById('overlay-leave').hidden = !online;
+  if (online) {
+    // 再来一局要双方都点；点过的一方等对方
+    if (state.winner) title = state.winner === online.seat ? O.youWin : O.youLose;
+    if (online.rematch[online.seat]) { again.textContent = O.rematchWaiting; again.disabled = true; }
+    else if (online.rematch[opponent(online.seat)]) reason += (DJC.isCjk(lang) ? '' : ' ') + O.rematchOffer;
+  }
+  document.getElementById('overlay-title').textContent = title;
+  document.getElementById('overlay-reason').textContent = reason;
   if (!overlay.classList.contains('show')) {
     overlay.classList.add('show');
     document.getElementById('overlay-restart').focus();
   }
+}
+
+// 联网面板：连接状态、邀请链接、轮到谁、判胜按钮；底部按钮在单机/联网之间切换
+function renderOnline() {
+  const O = L().online, on = !!online;
+  const el = id => document.getElementById(id);
+  el('online').hidden = !on;
+  el('restart').hidden = on;
+  el('online-start').hidden = on || !ONLINE_SERVER;
+  el('online-leave').hidden = !on;
+  el('online-resign').hidden = !on || online.status !== 'open' || !online.seated.p2 || state.phase === 'over';
+  if (!on) return;
+
+  const inviting = !!online.room && !online.seated.p2 && online.status !== 'closed';
+  el('online-invite').hidden = !inviting;
+  if (inviting) el('online-link').value = inviteLink();
+  el('online-share').hidden = !(typeof navigator !== 'undefined' && navigator.share);
+  el('online-claim').hidden = !canClaim();
+
+  let key = online.note;
+  if (!key) {
+    if (online.status === 'creating' || online.status === 'connecting') key = 'connecting';
+    else if (online.status === 'retrying') key = 'reconnecting';
+    else if (!online.seated.p2) key = 'invite';
+    else if (state.phase === 'over') key = null;
+    else if (state.current === online.seat) key = 'yourTurn';
+    else key = canClaim() ? 'away' : 'theirTurn';
+  }
+  const text = key ? O[key] : '';
+  if (el('online-text').textContent !== text) el('online-text').textContent = text;
 }
 
 /* ---------- 启动 ---------- */
@@ -675,26 +1000,54 @@ if (typeof document !== 'undefined') {
   });
   // 页内确认框：部分 App 内置浏览器会屏蔽 window.confirm（直接返回 false），重新开局就永远点不动
   const confirmDlg = document.getElementById('confirm');
-  document.getElementById('restart').addEventListener('click', () => {
+  const ask = kind => {
+    confirmKind = kind;
+    renderStatic();
+    if (typeof confirmDlg.showModal === 'function') confirmDlg.showModal();
+    else if (window.confirm(document.getElementById('confirm-text').textContent)) confirmed();
+  };
+  const on = (id, fn) => document.getElementById(id).addEventListener('click', fn);
+  on('restart', () => {
     const inProgress = state.phase !== 'over' && state.board.some(p => !p || p.revealed);
-    if (!inProgress) newGame();
-    else if (typeof confirmDlg.showModal === 'function') confirmDlg.showModal();
-    else if (window.confirm(L().confirmRestart)) newGame();
+    if (!inProgress) newGame(); else ask('restart');
   });
-  document.getElementById('confirm-ok').addEventListener('click', () => { confirmDlg.close(); newGame(); });
-  document.getElementById('confirm-cancel').addEventListener('click', () => confirmDlg.close());
-  document.getElementById('overlay-restart').addEventListener('click', () => {
+  on('confirm-ok', () => { confirmDlg.close(); confirmed(); });
+  on('confirm-cancel', () => confirmDlg.close());
+  on('overlay-restart', () => {
+    if (online) { send({ t: 'rematch' }); return; }
     newGame();
     boardEl.children[0].focus();
   });
+  on('online-start', startOnline);
+  on('online-leave', leaveOnline);
+  on('overlay-leave', leaveOnline);
+  on('online-resign', () => ask('resign'));
+  on('online-claim', () => send({ t: 'claim' }));
+  on('online-copy', () => {
+    const copied = () => { online.copiedUntil = Date.now() + 2000; render(); setTimeout(() => { if (online) render(); }, 2000); };
+    const select = () => document.getElementById('online-link').select();
+    if (navigator.clipboard) navigator.clipboard.writeText(inviteLink()).then(copied, select); else select();
+  });
+  on('online-share', () => {
+    navigator.share({ title: L().title, url: inviteLink() }).catch(() => { /* 用户取消 */ });
+  });
   updateLangPicker = DJC.mountLangPicker(document.getElementById('lang-picker'), setLang);
   // 从规则页按返回键回来时，页面可能直接从 bfcache 恢复，需要刷新链接状态和在规则页改过的语言
-  window.addEventListener('pageshow', e => { if (e.persisted && state) { lang = DJC.loadLang(); render(); } });
-  state = loadGame();
-  try {
-    if (state) render(); else newGame();
-  } catch (e) {
-    newGame();   // 校验漏掉的坏存档也不能让页面卡死
+  window.addEventListener('pageshow', e => { if (e.persisted && state) { lang = DJC.loadLang(); render(); wake(); } });
+  window.addEventListener('online', wake);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wake(); });
+
+  const room = ONLINE_SERVER && typeof location !== 'undefined' &&
+    (new URLSearchParams(location.search).get('room') || '').toUpperCase();
+  if (room && ROOM_CODE.test(room)) {
+    enterOnline(room);
+  } else {
+    state = loadGame();
+    try {
+      if (state) render(); else newGame();
+    } catch (e) {
+      newGame();   // 校验漏掉的坏存档也不能让页面卡死
+    }
   }
 }
 </script>
