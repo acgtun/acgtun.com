@@ -62,6 +62,7 @@ docs/dark-jungle-chess/
 server/
   wrangler.jsonc   Worker + Durable Object 绑定、SQLite 迁移
   package.json     只有 wrangler 一个开发依赖（仓库里第一个依赖，只在 server/）
+  smoke.js         端到端冒烟测试：对运行中的服务器（wrangler dev 或线上）完整下一局
   src/index.js     Worker：路由、Origin 校验、限流、转发到房间
   src/room.js      Durable Object 适配层：连接、休眠、存储、alarm
   src/room-core.js 房间逻辑：座位、协议、脱敏视图（不依赖 Cloudflare，可直接用 node 测）
@@ -149,8 +150,8 @@ globalThis.DJCEngine = (() => {
 - 防泄漏是第一位：服务器发出的每一条消息都经过 `viewFor`，测试对随机对局里的每一条外发消息做扫描，暗子不能带 `rank` / `color`。
 - 所有客户端输入都不可信：严格校验消息结构和取值范围，校验当前座位、轮次、版本号，非法就回 `err`，规则判断全部在服务器。
 - WebSocket 升级请求校验 `Origin`：只接受 `https://acgtun.com`、`https://www.acgtun.com`（本地开发时加上 `http://127.0.0.1:8000`），防跨站 WebSocket 劫持。`POST /rooms` 的 CORS 也只放行这两个来源。
-- 限流：每个连接每秒最多 10 条消息，超限关闭（1008）；创建房间按 IP 限速（每小时 20 个），用 Workers 的 Rate Limiting 绑定或 WAF 限速规则。
-- 每个房间最多 2 个连接（各座位一个）。
+- 限流：每个连接每秒最多 10 条消息，超限关闭（1008）；用 Workers 的 Rate Limiting 绑定按 IP 限速：创建房间每分钟 10 个，WebSocket 连接每分钟 60 个（该绑定只支持 10 秒或 60 秒的周期，且按 Cloudflare 机房分别计数，是近似限制）。
+- 每个房间只有 2 个座位，第三个人入座被拒（`roomFull`）；同座位的新连接顶掉旧连接。每个房间最多同时 6 个连接（含还没发 `hello` 的），没在 10 秒内发 `hello` 的连接会被断开。
 - 不收集个人信息：没有账号、昵称、聊天。房间数据 24 小时后删除。
 - 页面 CSP 增加 `connect-src https://<api 域名> wss://<api 域名>`，只放行对局服务器；其余（Trusted Types、无 `innerHTML`、脚本哈希）不变。`tools/csp.js` 负责生成。
 - Worker 的响应带 `X-Content-Type-Options: nosniff` 等安全头；错误信息不回显内部细节。
@@ -177,10 +178,11 @@ globalThis.DJCEngine = (() => {
 
 - `node tests/game.test.js`：现有规则与界面测试，改为加载 `engine.js`。
 - `node tests/room.test.js`（无依赖，直接测 RoomCore）：
-  - 数千局随机对局，双方客户端各自随机走合法步，每条外发消息都不含暗子信息。
+  - 每次运行 400 局随机对局（随机种子，失败时打印种子以便重现），双方客户端各自随机走合法步，每条外发消息都不含暗子信息。
   - 不是自己的回合、非法移动、版本号过期、结构不对的消息都被拒绝且状态不变。
   - 第三个连接被拒；同座位新连接顶掉旧连接；带 token 重连回到原座位，错误 token 被拒。
   - 再来一局交换先后手；弃局判胜只在对手离线满 5 分钟且轮到对手时成立；过期后房间清空。
+- 服务器冒烟测试：`server/` 下 `npm run dev` 起本地服务器，另开终端 `npm run smoke`（或 `node smoke.js <线上地址>`）。检查 Origin 校验、完整一局、第三人被拒、过期版本号、ping/pong、再来一局交换座位、认输、带 token 重连。
 - 端到端：`wrangler dev` 起本地服务器，两个无头 Chrome 页面通过 CDP 完整下一局，检查无 CSP 报错、双方画面一致。
 
 ## 实现步骤
@@ -191,7 +193,7 @@ globalThis.DJCEngine = (() => {
 | --- | --- | --- |
 | engine | 抽出 `engine.js`，单机版改用它，行为不变 | 已完成 |
 | room-core | RoomCore：座位、协议、脱敏视图、`room.test.js` | 已完成 |
-| server | Durable Object 适配、Worker 路由、Origin 校验、限流、`wrangler dev` | 待开始 |
+| server | Durable Object 适配、Worker 路由、Origin 校验、限流、`wrangler dev` | 已完成 |
 | client | 联网模式界面、重连、CSP `connect-src`、30 种语言文案 | 待开始 |
 | deploy | Cloudflare 账户、服务器地址、线上冒烟测试 | 待开始 |
 | polish | 弃局判胜、再来一局、系统分享；以后再考虑随机匹配、观战 | 待开始 |

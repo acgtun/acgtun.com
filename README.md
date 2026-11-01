@@ -19,6 +19,14 @@ python3 -m http.server 8000 --bind 127.0.0.1 --directory docs
 
 Then open <http://127.0.0.1:8000/dark-jungle-chess/>.
 
+The online play server (needs Node.js; the first command installs wrangler into `server/node_modules`):
+
+```bash
+cd server && npm install
+npm run dev     # local server on http://127.0.0.1:8787
+npm run smoke   # in another terminal: plays a full game against it
+```
+
 ## Test
 
 ```bash
