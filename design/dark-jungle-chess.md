@@ -3,11 +3,11 @@
 用单个 HTML 文件（纯 HTML/CSS/JS）实现一个 4x4 暗棋版斗兽棋，双人同屏轮流操作，含翻子定色阶段、吃子等级规则、同归于尽和胜负判定。
 
 - 状态：已实现，待发布到 <https://acgtun.com/dark-jungle-chess/>
-- 代码：[`docs/dark-jungle-chess/index.html`](../docs/dark-jungle-chess/index.html)
+- 代码：[`docs/dark-jungle-chess/index.html`](../docs/dark-jungle-chess/index.html)（界面）、[`engine.js`](../docs/dark-jungle-chess/engine.js)（规则）
 
 ## 目标与范围
 
-- 单文件游戏（内嵌 CSS/JS），无任何依赖，浏览器直接打开即玩。
+- 纯静态页面，无任何依赖，浏览器直接打开即玩。规则逻辑在 `engine.js`（不碰 DOM 的纯函数，`DJCEngine.apply(state, seat, action)` 是唯一的状态迁移入口，联网服务器也用它），界面在 `index.html`。
 - 通过 GitHub Pages 托管：`docs/` 为站点根目录，`docs/CNAME` 绑定 `acgtun.com`，`docs/.nojekyll` 关闭 Jekyll 处理，`docs/index.html` 为入口页。
 - 双人同屏（hot-seat）。不做 AI。联网对战见 [`dark-jungle-chess-online.md`](dark-jungle-chess-online.md)（设计中）。
 
@@ -67,7 +67,7 @@ state = {
 
 存档是不可信输入：`loadGame` 用 `isValidSave` 逐字段校验（阶段枚举、16 格棋子、棋子总数 16、消息键必须在 I18N 里且参数类型正确等），任何一项不符就丢弃，开一局新的。渲染出错也回退到新局，坏存档不会让页面卡死。
 
-吃子判定为纯函数，便于自测：
+吃子判定（`engine.js`）为纯函数，便于自测：
 
 ```js
 function canCapture(a, b) {
@@ -114,8 +114,8 @@ flowchart TD
 ## 安全
 
 - 不用 `innerHTML` 等 HTML 字符串接口，所有文本经 `textContent` / `createElement` 写入 DOM（测试会扫描页面）。
-- 每个页面带 `<meta>` CSP：`default-src 'none'`，内联 `<script>` / `<style>` 只放行其 sha256 哈希，外部脚本只放行同源（`'self'`，即 `i18n.js`），并开启 Trusted Types（`require-trusted-types-for 'script'; trusted-types 'none'`），即使将来误用 HTML 字符串接口也会被浏览器拒绝。
-- 改了任何页面的内联脚本或样式、或 `i18n.js` 后运行 `node tools/csp.js`：重算 CSP 哈希，并把外部脚本地址写成 `i18n.js?v=<内容哈希>`（GitHub Pages 对所有文件缓存 10 分钟，带版本号才不会出现新页面配旧脚本）。测试会校验两者是否最新。
+- 每个页面带 `<meta>` CSP：`default-src 'none'`，内联 `<script>` / `<style>` 只放行其 sha256 哈希，外部脚本只放行同源（`'self'`，即 `i18n.js`、`engine.js`），并开启 Trusted Types（`require-trusted-types-for 'script'; trusted-types 'none'`），即使将来误用 HTML 字符串接口也会被浏览器拒绝。
+- 改了任何页面的内联脚本或样式、或 `i18n.js`、`engine.js` 后运行 `node tools/csp.js`：重算 CSP 哈希，并把外部脚本地址写成 `i18n.js?v=<内容哈希>` 这样的带版本号地址（GitHub Pages 对所有文件缓存 10 分钟，带版本号才不会出现新页面配旧脚本）。测试会校验两者是否最新。
 - `<meta>` CSP 不支持 `frame-ancestors` 和上报；GitHub Pages 不能设响应头，这两项接受缺失。
 
 ## 实现步骤
@@ -131,7 +131,9 @@ flowchart TD
 
 ## 测试
 
-`node tests/game.test.js`，无依赖。测试直接执行页面里的 `<script>`（用最小的假 DOM），覆盖：
+`node tests/game.test.js`，无依赖。测试直接执行 `engine.js` 和页面里的 `<script>`（用最小的假 DOM），覆盖：
+
+- `DJCEngine.apply` 拒绝的动作（不是自己的回合、非法移动、结构不对）不改变状态；同一种子发同一副牌。
 
 - `canCapture` 全部 8×8 组合；8 吃 1、1 不能吃 8。
 - 同级同归于尽，双方进被吃区，目标格变空；最后的子同归于尽判和。

@@ -6,7 +6,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-gIpOoNbmo7aT5joAR68oF7B0PcwA3lTEHodUEn9DaGw='; style-src 'sha256-VD8vsETTuBvPjlclOsE2GhRR04FBc+YD1pTguVTinAY='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-gQkzxGyCK1N9cwHtPQqb94JlFksapR7f234TCqF8cYs='; style-src 'sha256-VD8vsETTuBvPjlclOsE2GhRR04FBc+YD1pTguVTinAY='; img-src data:; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>暗棋斗兽棋</title>
 <meta name="description" content="暗棋斗兽棋 · Dark Jungle Chess：4×4 翻棋版斗兽棋，双人同屏对战，支持 30 种语言。A 4×4 hidden-piece Jungle chess for two players on one screen, in 30 languages.">
@@ -378,70 +378,17 @@ body.cjk .overlay-box button { letter-spacing: 3px; }
   </div>
 </dialog>
 <script src="i18n.js?v=a2e9667e6c"></script>
+<script src="engine.js?v=5f4a81c63c"></script>
 <script>
 'use strict';
 
-/* ---------- 常量与纯逻辑（不依赖 DOM，可单独测试） ---------- */
+/* ---------- 规则 ----------
+   规则逻辑在 engine.js（DJCEngine），联网对局服务器也用同一份。页面只负责界面状态：
+   选中格 selected、刚翻开的格子 lastFlipped。 */
 
+const E = DJCEngine;
+const { IDLE_DRAW_LIMIT, COLORS, canCapture, legalTargets } = E;
 const EMOJI = { 1: '🕸️', 2: '🐘', 3: '🦁', 4: '🐯', 5: '🐺', 6: '🐑', 7: '🐱', 8: '🐭' };
-const IDLE_DRAW_LIMIT = 40;   // 连续无翻子且无吃子的步数上限，达到判和
-
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-// 返回 true（可吃）/ false（不可吃）/ 'mutual'（同级，同归于尽）
-function canCapture(a, b) {
-  if (a === b) return 'mutual';
-  if (a === 8) return b === 1;            // 鼠只吃网
-  if (a === 1) return b >= 2 && b <= 7;   // 网吃不了鼠
-  return b > a;
-}
-
-function neighbors(i) {
-  const r = Math.floor(i / 4), c = i % 4, out = [];
-  if (r > 0) out.push(i - 4);
-  if (r < 3) out.push(i + 4);
-  if (c > 0) out.push(i - 1);
-  if (c < 3) out.push(i + 1);
-  return out;
-}
-
-// i 处己方明子的所有合法落点（空格移动 + 可吃的已翻开对方子）
-function legalTargets(board, i) {
-  const m = board[i], out = [];
-  for (const j of neighbors(i)) {
-    const t = board[j];
-    if (!t) out.push(j);
-    else if (t.revealed && t.color !== m.color && canCapture(m.rank, t.rank)) out.push(j);
-  }
-  return out;
-}
-
-function hasHidden(board) {
-  return board.some(p => p && !p.revealed);
-}
-
-function hasLegalAction(board, color) {
-  if (hasHidden(board)) return true;   // 有暗子可翻就有合法动作
-  return board.some((p, i) => p && p.revealed && p.color === color && legalTargets(board, i).length > 0);
-}
-
-function aliveCount(board, color) {
-  return board.filter(p => p && p.color === color).length;
-}
-
-function makeBoard() {
-  const pieces = [];
-  for (const color of ['red', 'black'])
-    for (let rank = 1; rank <= 8; rank++)
-      pieces.push({ rank, color, revealed: false });
-  return shuffle(pieces);
-}
 
 /* ---------- 多语言 ----------
    文案在 i18n.js（DJC）。状态消息以 {k: 消息键, p: 参数} 结构存储，渲染时才翻译，
@@ -466,7 +413,6 @@ function storageSet(kind, key, value) {
 // 存档是外部输入：逐字段校验，任何一项不对就整份丢弃，开新局。
 function saveGame() { storageSet('sessionStorage', SAVE_KEY, JSON.stringify(state)); }
 
-const COLORS = ['red', 'black'];
 const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 const isPiece = p => !!p && typeof p === 'object' && isInt(p.rank, 1, 8) &&
   COLORS.includes(p.color) && typeof p.revealed === 'boolean';
@@ -536,77 +482,24 @@ function setLang(l) {
 
 /* ---------- 游戏状态与流程 ---------- */
 
-let state = null;
+let state = null;   // 规则状态（见 engine.js）+ 界面字段 selected、lastFlipped
 
 function newGame() {
-  state = {
-    phase: 'assign',                       // 'assign' | 'play' | 'over'
-    board: makeBoard(),
-    players: { p1: null, p2: null },
-    current: 'p1',
-    round: 1,
-    roundFlips: [],                        // 定色阶段本轮翻出的颜色
-    selected: null,
-    captured: { red: [], black: [] },
-    idleSteps: 0,                          // 连续无翻子且无吃子的步数
-    lastFlipped: null,                     // 刚翻开的格子（用于翻转动画）
-    winner: undefined,                     // 'p1' | 'p2' | null=平局
-    overReason: [],                        // 结算原因（消息 parts）
-    message: [{ k: 'assignPrompt', p: { round: 1, n: 1 } }],
-  };
+  state = { ...E.newGame(), selected: null, lastFlipped: null };
   render();
 }
 
 function onCellClick(i) {
   if (!state || state.phase === 'over') return;
-  if (state.phase === 'assign') assignFlip(i);
+  if (state.phase === 'assign') act({ flip: i });
   else playClick(i);
 }
 
-/* 定色阶段：轮流翻子，某轮两人异色则各得所翻颜色 */
-function assignFlip(i) {
-  const p = state.board[i];
-  if (!p || p.revealed) return;
-  p.revealed = true;
-  state.lastFlipped = i;
-  state.roundFlips.push(p.color);
-
-  if (state.roundFlips.length < 2) {
-    state.current = 'p2';
-    state.message = [{ k: 'assignPrompt', p: { round: state.round, n: 2 } }];
-    render();
-    return;
-  }
-
-  const [c1, c2] = state.roundFlips;
-  if (c1 !== c2) {
-    startPlayPhase(c1, c2, [{ k: 'assignDone', p: { c1, c2 } }]);
-    return;
-  }
-
-  state.roundFlips = [];
-  state.round++;
-  state.current = 'p1';
-  if (!hasHidden(state.board)) {
-    // 极端情况：暗子翻完仍每轮同色，按最后翻色分配（玩家 1 得该色）
-    const other = c1 === 'red' ? 'black' : 'red';
-    startPlayPhase(c1, other, [{ k: 'assignExhausted', p: { c1, c2: other } }]);
-    return;
-  }
-  state.message = [{ k: 'sameColor' }, { k: 'assignPrompt', p: { round: state.round, n: 1 } }];
-  render();
-}
-
-function startPlayPhase(c1, c2, prefixParts) {
-  state.players.p1 = c1;
-  state.players.p2 = c2;
-  state.phase = 'play';
-  state.current = 'p1';
-  if (!hasLegalAction(state.board, c1)) {   // 理论上仅暗子翻完的极端情况可能触发
-    gameOver('p2', [{ k: 'noAction', p: { player: 'p1' } }]);
-    return;
-  }
-  state.message = [...prefixParts, { k: 'turnPrompt', p: { player: 'p1' } }];
+// 同屏对战：当前玩家就是操作者
+function act(action) {
+  if (!E.apply(state, state.current, action).ok) return;
+  state.selected = null;
+  if ('flip' in action) state.lastFlipped = action.flip;
   render();
 }
 
@@ -616,80 +509,15 @@ function playClick(i) {
   const p = state.board[i];
 
   if (state.selected !== null) {
-    if (legalTargets(state.board, state.selected).includes(i)) { doMove(state.selected, i); return; }
+    if (legalTargets(state.board, state.selected).includes(i)) { act({ move: [state.selected, i] }); return; }
     // 已选中时误点暗子不能翻子（会白白用掉回合）；点另一个己方明子则改选它
     state.selected = (i !== state.selected && p && p.revealed && p.color === myColor) ? i : null;
     render();
     return;
   }
-  if (p && !p.revealed) {
-    p.revealed = true;
-    state.lastFlipped = i;
-    state.idleSteps = 0;
-    endTurn([{ k: 'flipped', p: { player: state.current, piece: p } }]);
-    return;
-  }
+  if (p && !p.revealed) { act({ flip: i }); return; }
   if (p && p.revealed && p.color === myColor) { state.selected = i; render(); return; }
   state.selected = null;
-  render();
-}
-
-function doMove(from, to) {
-  const m = state.board[from], t = state.board[to];
-  let actionParts;
-  if (!t) {
-    state.board[to] = m;
-    state.board[from] = null;
-    state.idleSteps++;
-    actionParts = [{ k: 'moved', p: { piece: m } }];
-  } else {
-    state.idleSteps = 0;
-    const res = canCapture(m.rank, t.rank);
-    if (res === 'mutual') {
-      state.captured[m.color].push(m);
-      state.captured[t.color].push(t);
-      state.board[from] = null;
-      state.board[to] = null;
-      actionParts = [{ k: 'mutual', p: { a: m, b: t } }];
-    } else {
-      state.captured[t.color].push(t);
-      state.board[to] = m;
-      state.board[from] = null;
-      actionParts = [{ k: 'ate', p: { a: m, b: t } }];
-    }
-  }
-  endTurn(actionParts);
-}
-
-function endTurn(actionParts) {
-  state.selected = null;
-  const cur = state.current, opp = cur === 'p1' ? 'p2' : 'p1';
-  const curColor = state.players[cur], oppColor = state.players[opp];
-  const curAlive = aliveCount(state.board, curColor);
-  const oppAlive = aliveCount(state.board, oppColor);
-
-  if (curAlive === 0 && oppAlive === 0) { gameOver(null, [...actionParts, { k: 'bothDead' }]); return; }
-  if (oppAlive === 0) { gameOver(cur, [...actionParts, { k: 'eatenOut', p: { player: opp } }]); return; }
-  if (curAlive === 0) { gameOver(opp, [...actionParts, { k: 'eatenOut', p: { player: cur } }]); return; }
-  if (state.idleSteps >= IDLE_DRAW_LIMIT) {
-    gameOver(null, [...actionParts, { k: 'idleDraw', p: { limit: IDLE_DRAW_LIMIT } }]);
-    return;
-  }
-
-  state.current = opp;
-  if (!hasLegalAction(state.board, oppColor)) {
-    gameOver(cur, [...actionParts, { k: 'noAction', p: { player: opp } }]);
-    return;
-  }
-  state.message = [...actionParts, { k: 'turnPrompt', p: { player: opp } }];
-  render();
-}
-
-function gameOver(winner, reasonParts) {
-  state.phase = 'over';
-  state.winner = winner;
-  state.overReason = reasonParts;
-  state.message = [winner === null ? { k: 'draw' } : { k: 'win', p: { player: winner } }];
   render();
 }
 

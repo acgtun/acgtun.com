@@ -1,5 +1,5 @@
 // Writes a hash-based Content-Security-Policy <meta> and versioned script URLs into each published page.
-// Run after editing any inline <style> or <script>, or i18n.js: node tools/csp.js
+// Run after editing any inline <style> or <script>, or any script it loads (i18n.js, engine.js): node tools/csp.js
 // tests/game.test.js fails if a page is stale.
 'use strict';
 const crypto = require('crypto');
