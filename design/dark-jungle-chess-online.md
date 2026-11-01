@@ -76,16 +76,17 @@ tests/
 
 ```js
 globalThis.DJCEngine = (() => {
-  // canCapture, neighbors, legalTargets, hasHidden, hasLegalAction, aliveCount,
-  // IDLE_DRAW_LIMIT, newGame(rng), apply(state, seat, action), isValidState(state), viewFor(state)
+  // IDLE_DRAW_LIMIT, COLORS, canCapture, neighbors, legalTargets, hasHidden, hasLegalAction, aliveCount,
+  // newGame(rng), apply(state, seat, action)
   return Object.freeze({ ... });
 })();
 ```
 
-- 浏览器用 `<script src="engine.js?v=<哈希>">` 加载（`tools/csp.js` 的版本号逻辑从只处理 `i18n.js` 推广到所有同源脚本）。Worker 里 `import '../../docs/dark-jungle-chess/engine.js'` 后取 `globalThis.DJCEngine`，由 wrangler 打包。一份代码，两边规则不可能不一致。
-- `apply(state, seat, action)` 是唯一的状态迁移入口：`action` 为 `{ flip: i }` 或 `{ move: [from, to] }`，返回 `{ ok: true }` 或 `{ ok: false, err: '<消息键>' }`（`notYourTurn`、`illegalMove`、`gameOver` 等）。单机模式调用 `apply(state, state.current, action)`。
+- 浏览器用 `<script src="engine.js?v=<哈希>">` 加载（`tools/csp.js` 本来就给所有同源脚本加版本号，不用改）。Worker 里 `import '../../docs/dark-jungle-chess/engine.js'` 后取 `globalThis.DJCEngine`，由 wrangler 打包。一份代码，两边规则不可能不一致。
+- `apply(state, seat, action)` 是唯一的状态迁移入口：`action` 为 `{ flip: i }` 或 `{ move: [from, to] }`，返回 `{ ok: true }` 或 `{ ok: false, err: '<消息键>' }`（`notYourTurn`、`illegalMove`、`badAction`、`gameOver`），被拒的动作不改变状态。单机模式调用 `apply(state, state.current, action)`。
 - `newGame(rng)` 的洗牌接受随机数函数：浏览器用 `Math.random`（测试里换成带种子的），服务器用 `crypto.getRandomValues`。
 - 选中格 `selected` 和翻转动画 `lastFlipped` 是纯界面状态，移出规则状态。
+- 不放进 engine 的：脱敏视图 `viewFor` 属于房间逻辑，放在 `server/src/room-core.js`；存档校验 `isValidSave` 要对照 i18n 的消息键，留在页面里。
 - 这一步不改变任何行为，现有 27 个测试应原样通过。
 
 ## 协议（WebSocket，JSON 文本帧）
