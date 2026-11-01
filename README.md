@@ -7,7 +7,8 @@ Static site for [acgtun.com](https://acgtun.com), served by GitHub Pages from `d
 | `docs/` | Published site root (`CNAME`, `.nojekyll`, landing page) |
 | `docs/dark-jungle-chess/` | 暗棋斗兽棋 · Dark Jungle Chess: `index.html` (the game), `engine.js` (the rules, shared with the future online server), `rules.html` (how to play) and `i18n.js` (UI text in 30 languages) |
 | `design/` | Design docs (not published to the site) |
-| `tests/` | Game tests |
+| `server/` | Online play server (Cloudflare Workers + Durable Objects); `src/room-core.js` is the room logic |
+| `tests/` | Game and online-room tests |
 | `tools/csp.js` | Rewrites each page's Content-Security-Policy hashes and `?v=` script versions |
 
 ## Run locally
@@ -21,7 +22,8 @@ Then open <http://127.0.0.1:8000/dark-jungle-chess/>.
 ## Test
 
 ```bash
-node tests/game.test.js
+node tests/game.test.js   # the game, rules and translations
+node tests/room.test.js   # online rooms (server/src/room-core.js)
 ```
 
 No dependencies.

@@ -110,8 +110,8 @@ globalThis.DJCEngine = (() => {
 | 消息 | 说明 |
 | --- | --- |
 | `{"t":"welcome","seat":"p2","token":"..."}` | 领到座位时下发一次 token。 |
-| `{"t":"state","n":13,"you":"p1","view":{...},"online":{"p1":true,"p2":false}}` | 每次状态变化都发完整视图（16 格，很小），不做增量，客户端逻辑最简单。 |
-| `{"t":"err","k":"notYourTurn"}` | `k` 是 i18n 消息键，客户端按自己的语言显示。 |
+| `{"t":"state","n":13,"you":"p1","seated":{...},"online":{...},"rematch":{...},"last":{"flip":5},"view":{...}}` | 每次状态或在线状态变化都发完整视图（16 格，很小），不做增量，客户端逻辑最简单。`seated` 表示座位是否有人认领，`rematch` 表示谁已申请再来一局，`last` 是上一步动作（`{flip}` 或 `{move}`，用于动画）。 |
+| `{"t":"err","k":"notYourTurn"}` | `k` 是 i18n 消息键，客户端按自己的语言显示：`notYourTurn`、`illegalMove`、`badAction`、`gameOver`（来自 engine），以及 `stale`、`waiting`、`badMessage`、`badToken`、`roomFull`、`cannotClaim`、`notOver`。 |
 
 视图（`viewFor`）：
 
@@ -120,8 +120,7 @@ globalThis.DJCEngine = (() => {
   phase, current, players, round, idleSteps, winner,
   board: [ null | { hidden: true } | { rank, color }, ... ],   // 暗子没有 rank / color
   captured: { red: [...], black: [...] },                        // 被吃的子都已翻开
-  message: [{ k, p }], overReason: [{ k, p }],                   // 与单机版同一套消息键
-  last: { flip: 5 } | { move: [4, 8] } | null,                    // 用于动画
+  message: [{ k, p }], overReason: [{ k, p }],                   // 与单机版同一套消息键，另加 resigned、abandoned
 }
 ```
 
@@ -190,8 +189,8 @@ globalThis.DJCEngine = (() => {
 
 | 步骤 | 内容 | 状态 |
 | --- | --- | --- |
-| engine | 抽出 `engine.js`，单机版改用它，行为不变 | 待开始 |
-| room-core | RoomCore：座位、协议、脱敏视图、`room.test.js` | 待开始 |
+| engine | 抽出 `engine.js`，单机版改用它，行为不变 | 已完成 |
+| room-core | RoomCore：座位、协议、脱敏视图、`room.test.js` | 已完成 |
 | server | Durable Object 适配、Worker 路由、Origin 校验、限流、`wrangler dev` | 待开始 |
 | client | 联网模式界面、重连、CSP `connect-src`、30 种语言文案 | 待开始 |
 | deploy | Cloudflare 账户、服务器地址、线上冒烟测试 | 待开始 |
