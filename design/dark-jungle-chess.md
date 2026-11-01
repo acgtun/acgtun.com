@@ -9,7 +9,7 @@
 
 - 单文件游戏（内嵌 CSS/JS），无任何依赖，浏览器直接打开即玩。
 - 通过 GitHub Pages 托管：`docs/` 为站点根目录，`docs/CNAME` 绑定 `acgtun.com`，`docs/.nojekyll` 关闭 Jekyll 处理，`docs/index.html` 为入口页。
-- 双人同屏（hot-seat）。不做 AI，不做联网。
+- 双人同屏（hot-seat）。不做 AI。联网对战见 [`dark-jungle-chess-online.md`](dark-jungle-chess-online.md)（设计中）。
 
 ## 规则
 
