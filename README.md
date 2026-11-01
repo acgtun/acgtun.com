@@ -5,10 +5,10 @@ Static site for [acgtun.com](https://acgtun.com), served by GitHub Pages from `d
 | Path | What |
 | --- | --- |
 | `docs/` | Published site root (`CNAME`, `.nojekyll`, landing page) |
-| `docs/dark-jungle-chess/` | 暗棋斗兽棋 · Dark Jungle Chess: `index.html` (the game), `rules.html` (how to play) and `i18n.js` (UI text in 30 languages) |
+| `docs/dark-jungle-chess/` | 暗棋斗兽棋 · Dark Jungle Chess: `index.html` (the game), `engine.js` (the rules, shared with the future online server), `rules.html` (how to play) and `i18n.js` (UI text in 30 languages) |
 | `design/` | Design docs (not published to the site) |
 | `tests/` | Game tests |
-| `tools/csp.js` | Rewrites each page's Content-Security-Policy hashes and `i18n.js?v=` version |
+| `tools/csp.js` | Rewrites each page's Content-Security-Policy hashes and `?v=` script versions |
 
 ## Run locally
 
@@ -26,7 +26,7 @@ node tests/game.test.js
 
 No dependencies.
 
-After editing any inline `<script>` or `<style>`, or `i18n.js`, regenerate the CSP hashes and script versions (the tests fail until you do):
+After editing any inline `<script>` or `<style>`, `i18n.js` or `engine.js`, regenerate the CSP hashes and script versions (the tests fail until you do):
 
 ```bash
 node tools/csp.js

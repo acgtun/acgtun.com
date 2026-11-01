@@ -9,6 +9,8 @@ const html = fs.readFileSync(path.join(GAME_DIR, 'index.html'), 'utf8');
 const rulesHtml = fs.readFileSync(path.join(GAME_DIR, 'rules.html'), 'utf8');
 const I18N_FILE = path.join(GAME_DIR, 'i18n.js');
 const I18N_SRC = fs.readFileSync(I18N_FILE, 'utf8');
+const ENGINE_FILE = path.join(GAME_DIR, 'engine.js');
+const ENGINE_SRC = fs.readFileSync(ENGINE_FILE, 'utf8');
 const scriptOf = page => page.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 // Seeded RNG so a failing random game can be replayed: SEED=<n> node tests/game.test.js
@@ -45,7 +47,7 @@ global.document = {
   getElementById: id => (els[id] ||= fakeEl()),
   createElement: () => fakeEl(),
 };
-const loadPage = () => new Function(I18N_SRC + '\n' + scriptOf(html) +
+const loadPage = () => new Function(I18N_SRC + '\n' + ENGINE_SRC + '\n' + scriptOf(html) +
   '\nreturn { get state() { return state; }, set state(s) { state = s; }, get lang() { return lang; }, onCellClick, newGame, loadGame, ' +
   'canCapture, legalTargets, setLang, fmtMsg, IDLE_DRAW_LIMIT, DJC, SAVE_KEY };')();
 const game = loadPage();
@@ -133,6 +135,44 @@ const tests = {
     assert.deepStrictEqual(s.overReason.map(x => x.k), ['moved', 'idleDraw']);
   },
 
+  'engine: a rejected action leaves the game exactly as it was'() {
+    const E = globalThis.DJCEngine;
+    const b = emptyBoard();
+    b[0] = P(5, 'red'); b[1] = P(3, 'black'); b[2] = P(6, 'black', false); b[15] = P(7, 'black');
+    const s = playState(b);
+    const before = JSON.stringify(s);
+    const cases = [
+      ['p2', { flip: 2 }, 'notYourTurn'],
+      ['p1', { flip: 0 }, 'illegalMove'],            // already face-up
+      ['p1', { flip: 5 }, 'illegalMove'],            // empty square
+      ['p1', { move: [0, 1] }, 'illegalMove'],       // 5 cannot capture 3
+      ['p1', { move: [15, 11] }, 'illegalMove'],     // not your piece
+      ['p1', { move: [0, 2] }, 'illegalMove'],       // cannot capture a hidden piece
+      ['p1', { move: [0, 5] }, 'illegalMove'],       // not adjacent
+      ['p1', { flip: 16 }, 'badAction'], ['p1', { flip: '2' }, 'badAction'], ['p1', { flip: 1.5 }, 'badAction'],
+      ['p1', { move: [0] }, 'badAction'], ['p1', { flip: 2, move: [0, 4] }, 'badAction'],
+      ['p1', null, 'badAction'], ['p1', [2], 'badAction'], ['p1', { jump: 2 }, 'badAction'],
+    ];
+    for (const [seat, action, err] of cases) {
+      assert.deepStrictEqual(E.apply(s, seat, action), { ok: false, err }, JSON.stringify(action));
+      assert.strictEqual(JSON.stringify(s), before, `${JSON.stringify(action)} changed the state`);
+    }
+    s.phase = 'over';
+    assert.deepStrictEqual(E.apply(s, 'p1', { flip: 2 }), { ok: false, err: 'gameOver' });
+  },
+
+  'engine: the color phase rejects moves, and the same seed deals the same board'() {
+    const E = globalThis.DJCEngine;
+    const seeded = seed => () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    assert.deepStrictEqual(E.newGame(seeded(7)).board, E.newGame(seeded(7)).board);
+    assert.notDeepStrictEqual(E.newGame(seeded(7)).board, E.newGame(seeded(8)).board);
+    const s = E.newGame(seeded(7));
+    assert.deepStrictEqual(E.apply(s, 'p1', { move: [0, 1] }), { ok: false, err: 'illegalMove' });
+    assert.deepStrictEqual(E.apply(s, 'p1', { flip: 0 }), { ok: true });
+    assert.strictEqual(s.current, 'p2');
+    assert.ok(!('selected' in s) && !('lastFlipped' in s), 'UI fields leaked into the rules state');
+  },
+
   'with a piece selected, tapping a hidden piece deselects and keeps the turn'() {
     const b = emptyBoard();
     b[0] = P(5, 'red'); b[15] = P(6, 'black', false); b[10] = P(3, 'black');
@@ -210,14 +250,14 @@ const tests = {
   },
 
   'no page builds HTML from strings (Trusted Types would block it)'() {
-    for (const file of [...PAGES, I18N_FILE]) {
+    for (const file of [...PAGES, I18N_FILE, ENGINE_FILE]) {
       const src = fs.readFileSync(file, 'utf8');
       assert.ok(!/\.(innerHTML|outerHTML)\s*=|insertAdjacentHTML|document\.write/.test(src), path.basename(file));
     }
   },
 
   'no Object.hasOwn (it throws on Safari < 15.4 and leaves a blank page)'() {
-    for (const file of [...PAGES, I18N_FILE]) assert.ok(!/Object\.hasOwn\b/.test(fs.readFileSync(file, 'utf8')), path.basename(file));
+    for (const file of [...PAGES, I18N_FILE, ENGINE_FILE]) assert.ok(!/Object\.hasOwn\b/.test(fs.readFileSync(file, 'utf8')), path.basename(file));
   },
 
   'every page re-reads the language when Back restores it from the bfcache'() {
