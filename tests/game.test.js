@@ -33,9 +33,11 @@ function fakeEl() {
     appendChild(c) { this.children.push(c); },
     append(...cs) { this.children.push(...cs); },
     replaceChildren(...cs) { this.children = cs; },
-    addEventListener() {}, contains: () => false, focus() {},
+    listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; },
+    contains: () => false, focus() {}, select() {},
   };
 }
+const click = id => els[id].listeners.click();
 function fakeStorage() {
   const m = new Map();
   return { getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)) };
@@ -46,10 +48,51 @@ global.document = {
   documentElement: {}, title: '', activeElement: null, body: { classList: { toggle() {} } },
   getElementById: id => (els[id] ||= fakeEl()),
   createElement: () => fakeEl(),
+  addEventListener() {},
 };
 const loadPage = () => new Function(I18N_SRC + '\n' + ENGINE_SRC + '\n' + scriptOf(html) +
   '\nreturn { get state() { return state; }, set state(s) { state = s; }, get lang() { return lang; }, onCellClick, newGame, loadGame, ' +
-  'canCapture, legalTargets, setLang, fmtMsg, IDLE_DRAW_LIMIT, DJC, SAVE_KEY };')();
+  'canCapture, legalTargets, setLang, fmtMsg, IDLE_DRAW_LIMIT, DJC, SAVE_KEY, get online() { return online; }, startOnline, ONLINE_KEY };')();
+
+// Online play: a page served from 127.0.0.1 talks to the local server. Sockets, fetch, timers and the URL are fakes
+// the test drives by hand; restore() puts the globals back.
+function onlineEnv(search = '') {
+  const env = { sockets: [], timers: [], url: null, fetchReply: null };
+  class FakeSocket {
+    constructor(url) { this.url = url; this.readyState = 0; this.sent = []; env.sockets.push(this); }
+    send(text) { this.sent.push(text); }
+    close() { this.readyState = 3; }
+    open() { this.readyState = 1; this.onopen(); }
+    recv(msg) { this.onmessage({ data: typeof msg === 'string' ? msg : JSON.stringify(msg) }); }
+    drop(code) { this.readyState = 3; this.onclose({ code }); }
+    msgs() { return this.sent.filter(t => t !== 'ping').map(t => JSON.parse(t)); }
+  }
+  const saved = {};
+  const set = { WebSocket: FakeSocket, setTimeout: (fn, ms) => env.timers.push({ fn, ms }), setInterval: () => 0,
+    clearTimeout() {}, clearInterval() {},
+    location: { hostname: '127.0.0.1', search, pathname: '/dark-jungle-chess/', origin: 'http://127.0.0.1:8000' },
+    history: { replaceState(_, __, url) { env.url = url; } },
+    fetch: async (url, opts) => { env.fetched = [url, opts]; return env.fetchReply(); } };
+  for (const k of Object.keys(set)) { saved[k] = Object.getOwnPropertyDescriptor(global, k); global[k] = set[k]; }
+  env.restore = () => { for (const k of Object.keys(set)) { if (saved[k]) Object.defineProperty(global, k, saved[k]); else delete global[k]; } };
+  env.socket = () => env.sockets[env.sockets.length - 1];
+  return env;
+}
+
+// What the server would send (server/src/room-core.js viewFor): face-down pieces carry nothing.
+const pieceOut = p => ({ rank: p.rank, color: p.color });
+const partsOut = a => a.map(x => (x.p ? { k: x.k, p: Object.fromEntries(Object.entries(x.p).map(([k, v]) => [k, v && typeof v === 'object' ? pieceOut(v) : v])) } : { k: x.k }));
+const viewOf = g => ({
+  phase: g.phase, current: g.current, players: { ...g.players }, round: g.round, idleSteps: g.idleSteps,
+  winner: g.winner === undefined ? null : g.winner,
+  board: g.board.map(p => (!p ? null : p.revealed ? pieceOut(p) : { hidden: true })),
+  captured: { red: g.captured.red.map(pieceOut), black: g.captured.black.map(pieceOut) },
+  message: partsOut(g.message), overReason: partsOut(g.overReason),
+});
+const stateMsg = (g, n, you, extra = {}) => ({
+  t: 'state', n, you, seated: { p1: true, p2: true }, online: { p1: true, p2: true }, rematch: { p1: false, p2: false },
+  last: null, view: viewOf(g), ...extra,
+});
 const game = loadPage();
 const { DJC } = game;
 const { PAGES, build } = require('../tools/csp.js');
@@ -380,6 +423,159 @@ const tests = {
     assert.ok(/#board \{\s*direction: ltr;/.test(html), 'board must stay left-to-right so row/column labels match');
   },
 
+  'online play stays hidden until a server is configured, and the CSP allows only that server'() {
+    game.newGame();
+    assert.strictEqual(els['online-start'].hidden, true);
+    assert.strictEqual(els.online.hidden, true);
+    assert.strictEqual(game.online, null);
+    const withServer = html.replace(/(<meta name="online-server" id="online-server" content=")[^"]*/, '$1https://djc.example.workers.dev');
+    const csp = build(withServer, PAGES[1]).match(/connect-src ([^;]*)/)[1].split(' ');
+    assert.deepStrictEqual(csp, ['http://127.0.0.1:8787', 'ws://127.0.0.1:8787', 'https://djc.example.workers.dev', 'wss://djc.example.workers.dev']);
+    for (const file of [PAGES[0], PAGES[2]]) assert.ok(!/connect-src/.test(fs.readFileSync(file, 'utf8')), file);
+  },
+
+  'online: joining by link takes a seat, shows only what the server sends, and sends moves as intents'() {
+    const env = onlineEnv('?room=abcdefghjk');
+    try {
+      const saveBefore = window.sessionStorage.getItem(game.SAVE_KEY);
+      const page = loadPage();
+      page.setLang('en');
+      const ws = env.socket();
+      assert.strictEqual(ws.url, 'ws://127.0.0.1:8787/rooms/ABCDEFGHJK/ws');
+      assert.strictEqual(els['online-text'].textContent, DJC.T.en.online.connecting);
+      ws.open();
+      assert.deepStrictEqual(ws.msgs(), [{ t: 'hello', v: 1, token: null }]);
+      ws.recv({ t: 'welcome', seat: 'p2', token: 'tok-2' });
+      assert.strictEqual(JSON.parse(window.localStorage.getItem(page.ONLINE_KEY)).ABCDEFGHJK.token, 'tok-2');
+
+      const E = globalThis.DJCEngine, g = E.newGame();
+      ws.recv(stateMsg(g, 0, 'p2'));
+      assert.ok(page.state.board.every(p => p && !p.revealed && p.rank === 0 && p.color === null), 'face-down pieces are blank');
+      assert.ok(els['label-p2'].textContent.endsWith('(you)'), els['label-p2'].textContent);
+      assert.strictEqual(els['online-text'].textContent, DJC.T.en.online.theirTurn);
+      page.onCellClick(0);
+      assert.strictEqual(ws.msgs().length, 1, 'cannot play on the opponent’s turn');
+
+      E.apply(g, 'p1', { flip: 0 });
+      ws.recv(stateMsg(g, 1, 'p2', { last: { flip: 0 } }));
+      assert.strictEqual(page.state.board[0].revealed, true);
+      assert.strictEqual(els['online-text'].textContent, DJC.T.en.online.yourTurn);
+      page.onCellClick(3);
+      page.onCellClick(4);
+      assert.deepStrictEqual(ws.msgs().slice(1), [{ t: 'act', n: 1, a: { flip: 3 } }], 'one intent, then wait for the server');
+      assert.ok(!g.board[3].revealed, 'the page never changes the game itself');
+
+      ws.recv({ t: 'err', k: 'stale' });
+      assert.strictEqual(els['online-text'].textContent, DJC.T.en.online.rejected);
+      const bad = stateMsg(g, 2, 'p2');
+      bad.view.board[5] = { rank: '<img src=x>', color: 'red' };
+      ws.recv(bad);
+      const noKey = stateMsg(g, 2, 'p2');
+      noKey.view.message = [{ k: 'constructor' }];
+      ws.recv(noKey);
+      ws.recv('not json');
+      assert.strictEqual(page.online.n, 1, 'malformed views are ignored');
+      assert.strictEqual(window.sessionStorage.getItem(game.SAVE_KEY), saveBefore, 'online play does not touch the one-screen save');
+    } finally { env.restore(); }
+  },
+
+  'online: a dropped connection reconnects with the seat token; a deleted room stops'() {
+    const env = onlineEnv('?room=K7Q2XM4PTA');
+    try {
+      window.localStorage.setItem('dark-jungle-chess-online', JSON.stringify({ K7Q2XM4PTA: { token: 'tok-1', at: Date.now() } }));
+      const page = loadPage();
+      page.setLang('en');
+      env.socket().open();
+      assert.deepStrictEqual(env.socket().msgs(), [{ t: 'hello', v: 1, token: 'tok-1' }]);
+      env.socket().recv(stateMsg(globalThis.DJCEngine.newGame(), 0, 'p1'));
+      env.socket().drop(1006);
+      assert.strictEqual(els['online-text'].textContent, DJC.T.en.online.reconnecting);
+      assert.deepStrictEqual(env.timers.map(t => t.ms), [1000]);
+      env.timers.shift().fn();
+      env.socket().open();
+      assert.strictEqual(env.sockets.length, 2);
+      assert.deepStrictEqual(env.socket().msgs(), [{ t: 'hello', v: 1, token: 'tok-1' }]);
+      env.socket().drop(1006);
+      env.timers.shift().fn();
+      assert.strictEqual(env.sockets[1].onclose, null, 'a replaced socket can no longer trigger a retry');
+      env.socket().drop(4004);
+      assert.strictEqual(env.timers.length, 0, 'no retry once the room is gone');
+      assert.strictEqual(els['online-text'].textContent, DJC.T.en.online.gone);
+      assert.strictEqual(window.localStorage.getItem('dark-jungle-chess-online'), '{}', 'the dead seat token is forgotten');
+    } finally { env.restore(); }
+  },
+
+  async 'online: creating a room shows the invite link and joins as Player 1'() {
+    const env = onlineEnv();
+    try {
+      const page = loadPage();
+      page.setLang('en');
+      assert.strictEqual(els['online-start'].hidden, false);
+      env.fetchReply = () => ({ ok: false, status: 503 });
+      await page.startOnline();
+      assert.strictEqual(els['online-text'].textContent, DJC.T.en.online.unavailable);
+      click('online-leave');
+      assert.strictEqual(page.online, null);
+
+      env.fetchReply = () => ({ ok: true, json: async () => ({ room: 'K7Q2XM4PTA', token: 'tok-new' }) });
+      await page.startOnline();
+      assert.deepStrictEqual(env.fetched, ['http://127.0.0.1:8787/rooms', { method: 'POST' }]);
+      assert.strictEqual(env.url, '?room=K7Q2XM4PTA');
+      env.socket().open();
+      assert.deepStrictEqual(env.socket().msgs(), [{ t: 'hello', v: 1, token: 'tok-new' }]);
+      env.socket().recv(stateMsg(globalThis.DJCEngine.newGame(), 0, 'p1', { seated: { p1: true, p2: false }, online: { p1: true, p2: false } }));
+      assert.strictEqual(els['online-invite'].hidden, false);
+      assert.strictEqual(els['online-link'].value, 'http://127.0.0.1:8000/dark-jungle-chess/?room=K7Q2XM4PTA');
+      assert.strictEqual(els['online-text'].textContent, DJC.T.en.online.invite);
+      assert.strictEqual(els['online-resign'].hidden, true, 'nothing to resign before Player 2 arrives');
+      page.onCellClick(0);
+      assert.strictEqual(env.socket().msgs().length, 1, 'no moves until Player 2 joins');
+    } finally { env.restore(); }
+  },
+
+  'online: game over names the winner, rematch needs both players, every language renders it'() {
+    const env = onlineEnv('?room=K7Q2XM4PTA');
+    try {
+      const page = loadPage();
+      const ws = env.socket();
+      ws.open();
+      const g = globalThis.DJCEngine.newGame();
+      Object.assign(g, { phase: 'over', winner: 'p2', players: { p1: 'red', p2: 'black' },
+        overReason: [{ k: 'resigned', p: { player: 'p1' } }], message: [{ k: 'win', p: { player: 'p2' } }] });
+      ws.recv(stateMsg(g, 9, 'p2', { online: { p1: false, p2: true } }));
+      page.setLang('en');
+      assert.strictEqual(els['overlay-title'].textContent, 'You win!');
+      assert.strictEqual(els['overlay-reason'].textContent, 'Player 1 (Red) resigned');
+      assert.ok(els['label-p1'].textContent.endsWith('(offline)'), els['label-p1'].textContent);
+      assert.strictEqual(els['overlay-leave'].hidden, false);
+      click('overlay-restart');
+      assert.deepStrictEqual(ws.msgs().slice(1), [{ t: 'rematch' }]);
+      ws.recv(stateMsg(g, 10, 'p2', { rematch: { p1: false, p2: true } }));
+      assert.strictEqual(els['overlay-restart'].disabled, true);
+      assert.strictEqual(els['overlay-restart'].textContent, DJC.T.en.online.rematchWaiting);
+      ws.recv(stateMsg(g, 11, 'p2', { rematch: { p1: true, p2: false } }));
+      assert.ok(els['overlay-reason'].textContent.endsWith(DJC.T.en.online.rematchOffer));
+      for (const code of Object.keys(DJC.T)) {
+        page.setLang(code);
+        const texts = ['overlay-title', 'overlay-reason', 'overlay-restart', 'overlay-leave', 'label-p1', 'label-p2',
+          'online-leave', 'online-copy', 'online-share', 'online-claim', 'online-resign', 'online-start'].map(id => els[id].textContent);
+        for (const t of texts) assert.ok(t && !LEFTOVER.test(t), `${code}: "${t}"`);
+      }
+      const early = globalThis.DJCEngine.newGame();
+      Object.assign(early, { phase: 'over', winner: 'p1', overReason: [{ k: 'abandoned', p: { player: 'p2' } }] });
+      ws.recv(stateMsg(early, 12, 'p2'));
+      assert.strictEqual(page.online.n, 12, 'a game can end in the color phase, before anyone has a color');
+      page.setLang('en');
+      assert.strictEqual(els['overlay-title'].textContent, 'You lose.');
+      assert.strictEqual(els['overlay-reason'].textContent, 'Player 2 left the game');
+      click('overlay-leave');
+      assert.strictEqual(page.online, null);
+      assert.strictEqual(env.url, '/dark-jungle-chess/');
+      assert.strictEqual(ws.readyState, 3);
+      assert.notStrictEqual(page.state.board[0], undefined, 'back to a one-screen game');
+    } finally { env.restore(); }
+  },
+
   'random full games: pieces are conserved, turns pass, games end'() {
     const GAMES = 3000;
     for (let g = 0; g < GAMES; g++) {
@@ -409,10 +605,12 @@ const tests = {
   },
 };
 
-let failed = 0;
-for (const [name, fn] of Object.entries(tests)) {
-  try { fn(); console.log(`ok   ${name}`); }
-  catch (e) { failed++; console.log(`FAIL ${name}\n     ${e.message}`); }
-}
-console.log(failed ? `\n${failed} failed (replay with SEED=${SEED})` : `\nall passed (SEED=${SEED})`);
-process.exit(failed ? 1 : 0);
+(async () => {
+  let failed = 0;
+  for (const [name, fn] of Object.entries(tests)) {
+    try { await fn(); console.log(`ok   ${name}`); }
+    catch (e) { failed++; console.log(`FAIL ${name}\n     ${e.message}`); }
+  }
+  console.log(failed ? `\n${failed} failed (replay with SEED=${SEED})` : `\nall passed (SEED=${SEED})`);
+  process.exit(failed ? 1 : 0);
+})();

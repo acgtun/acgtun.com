@@ -153,7 +153,8 @@ globalThis.DJCEngine = (() => {
 - 限流：每个连接每秒最多 10 条消息，超限关闭（1008）；用 Workers 的 Rate Limiting 绑定按 IP 限速：创建房间每分钟 10 个，WebSocket 连接每分钟 60 个（该绑定只支持 10 秒或 60 秒的周期，且按 Cloudflare 机房分别计数，是近似限制）。
 - 每个房间只有 2 个座位，第三个人入座被拒（`roomFull`）；同座位的新连接顶掉旧连接。每个房间最多同时 6 个连接（含还没发 `hello` 的），没在 10 秒内发 `hello` 的连接会被断开。
 - 不收集个人信息：没有账号、昵称、聊天。房间数据 24 小时后删除。
-- 页面 CSP 增加 `connect-src https://<api 域名> wss://<api 域名>`，只放行对局服务器；其余（Trusted Types、无 `innerHTML`、脚本哈希）不变。`tools/csp.js` 负责生成。
+- 服务器地址写在页面的 `<meta name="online-server" id="online-server" content="...">` 里，为空时不显示联网入口（部署前就是这样，合并客户端代码不影响线上）。页面本身从 `127.0.0.1` 打开时改连本地的 `wrangler dev`（`http://127.0.0.1:8787`）。
+- 页面 CSP 增加 `connect-src`：只放行这两个地址（各自的 `https`/`wss` 或 `http`/`ws`）；其余（Trusted Types、无 `innerHTML`、脚本哈希）不变。`tools/csp.js` 从上面的 meta 读地址生成。
 - Worker 的响应带 `X-Content-Type-Options: nosniff` 等安全头；错误信息不回显内部细节。
 
 ## 界面
@@ -194,7 +195,7 @@ globalThis.DJCEngine = (() => {
 | engine | 抽出 `engine.js`，单机版改用它，行为不变 | 已完成 |
 | room-core | RoomCore：座位、协议、脱敏视图、`room.test.js` | 已完成 |
 | server | Durable Object 适配、Worker 路由、Origin 校验、限流、`wrangler dev` | 已完成 |
-| client | 联网模式界面、重连、CSP `connect-src`、30 种语言文案 | 待开始 |
+| client | 联网模式界面、重连、CSP `connect-src`、30 种语言文案 | 已完成 |
 | deploy | Cloudflare 账户、服务器地址、线上冒烟测试 | 待开始 |
 | polish | 弃局判胜、再来一局、系统分享；以后再考虑随机匹配、观战 | 待开始 |
 
