@@ -1,0 +1,9 @@
+{
+  "name": "dark-jungle-chess-server",
+  "private": true,
+  "type": "module",
+  "description": "Online rooms for Dark Jungle Chess (Cloudflare Workers + Durable Objects)",
+  "scripts": {
+    "test": "node ../tests/room.test.js"
+  }
+}
