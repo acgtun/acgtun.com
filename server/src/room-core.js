@@ -142,7 +142,8 @@ export class RoomCore {
   message(ws, text) {
     return this.serial(async () => {
       if (!(await this.loaded())) return ws.close(CLOSE.noRoom, 'noRoom');
-      if (typeof text !== 'string' || text.length > LIMITS.messageBytes) return ws.close(CLOSE.tooBig, 'tooBig');
+      if (typeof text !== 'string') return ws.close(CLOSE.policy, 'binary');
+      if (text.length > LIMITS.messageBytes) return ws.close(CLOSE.tooBig, 'tooBig');
       if (!this.withinRate(ws)) return ws.close(CLOSE.policy, 'rate');
       const m = parse(text);
       const seat = ws.meta && ws.meta.seat;
